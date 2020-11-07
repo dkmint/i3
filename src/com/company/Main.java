@@ -130,5 +130,10 @@ public class Main {
         SetParams setParams = new SetParams();
         double ddd = setParams.getrCut();
         System.out.println(ddd);
+        VecR region = new VecR(5, 5, 5);
+        System.out.println(region.x);
+        VSCopy vsCopy = new VSCopy();
+        vsCopy.getVSCopy(region, 1./Math.sqrt(density), uCells);
+        System.out.println(region.x + " " + region.y + " " + region.z);
     }
 }
