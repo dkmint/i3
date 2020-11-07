@@ -10,17 +10,17 @@ import java.util.InputMismatchException;
 import java.util.StringTokenizer;
 
 public class Io2 {
+    static Double deltaT, density, temperature;
+    static Integer stepAvg, stepEquil, stepInitlzTemp, stepLimit;
     public static void main(String[] args) throws IOException {
-        File pr = new File("/home/dmint/csi/pr3/pr_03_1.in");
+        File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
-        Double deltaT, density, temperature;
-        Integer stepAvg, stepEquil, stepInitlzTemp, stepLimit;
         ArrayList<Double> param = new ArrayList<Double>();
         ArrayList<Integer> steps = new ArrayList<Integer>();
         ArrayList<String> descriptionName = new ArrayList<String>();
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
-        ArrayList<UCell> uCells = new ArrayList<>();
+        UCell uCells = new UCell();
         String line;
         String value = null;
         String description = null;
@@ -42,10 +42,11 @@ public class Io2 {
                     value = stLine.nextToken();
                     if (value.contains(".")) {
                         flag = 1;
-                        descriptionName.add(description);
+                        nameR.add(new NameR(description, Double.parseDouble(value), flag));
                     }
-                    else
-                        descriptionName.add(description);
+                    else {
+                        nameI.add(new NameI(description, Integer.parseInt(value)));
+                    }
                     break;
                 case 3:
                     description = stLine.nextToken();
@@ -56,7 +57,10 @@ public class Io2 {
                         }
                         if (x.contains(".") || y.contains("."))
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
-                        descriptionName.add(description);
+                        uCells.setName(description);
+                        uCells.setX(Integer.parseInt(x));
+                        uCells.setY(Integer.parseInt(y));
+                        uCells.setSize(2);
                     }
                     else
                         throw new InputMismatchException("Too many data! In line " + countLine);
@@ -71,7 +75,11 @@ public class Io2 {
                         }
                         if (x.contains(".") || y.contains(".") || z.contains("."))
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
-                        descriptionName.add(description);
+                        uCells.setName(description);
+                        uCells.setX(Integer.parseInt(x));
+                        uCells.setY(Integer.parseInt(y));
+                        uCells.setZ(Integer.parseInt(x));
+                        uCells.setSize(3);
                     }
                     else
                         throw new InputMismatchException("Too many data! In line " + countLine);
@@ -79,26 +87,45 @@ public class Io2 {
                 case 5:
                     throw new InputMismatchException("Too many data! In line " + countLine);
             }
-            if (countToken == 2) {
-                System.out.println(description + " " + value);
-                if (flag == 1)
-                    param.add(Double.parseDouble(value));
-                else
-                    steps.add(Integer.parseInt(value));
+            if (countToken == 2 && flag == 1) {
+                System.out.println(description + "\t\t" + value);
             }
             else if (countToken == 3)
-                System.out.println(description + " " + x + " " + y);
+                System.out.println(description + "\t" + x + " " + y);
             else if (countToken == 4)
-                System.out.println(description + " " + x + " " + y + " " + z);
+                System.out.println(description + "\t" + x + " " + y + " " + z);
             countLine ++;
             flag = 0;
         }
         in.close();
-        for (int i = 0; i < descriptionName.size(); i ++) {
-            if (descriptionName.get(i).equals("deltaT"))
-                deltaT = param.get(i);
-            System.out.println(descriptionName.get(i));
+        for (int i = 0; i < nameR.size(); i ++) {
+            switch (nameR.get(i).getvName()) {
+                case "deltaT":
+                    deltaT = nameR.get(i).getvValue();
+                    break;
+                case "density":
+                    density = nameR.get(i).getvValue();
+                    break;
+                case "temperature":
+                    temperature = nameR.get(i).getvValue();
+                    break;
+            }
         }
-
+        for (int i = 0; i < nameI.size(); i ++) {
+            switch (nameI.get(i).getvName()) {
+                case "stepAvg":
+                    stepAvg = nameI.get(i).getvValue();
+                    break;
+                case "stepEquil":
+                    stepEquil = nameI.get(i).getvValue();
+                    break;
+                case "stepInitlzTemp":
+                    stepInitlzTemp = nameI.get(i).getvValue();
+                    break;
+                case "stepLimit" :
+                    stepLimit = nameI.get(i).getvValue();
+                    break;
+            }
+        }
     }
 }
