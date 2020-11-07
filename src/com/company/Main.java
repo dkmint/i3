@@ -127,13 +127,17 @@ public class Main {
                     break;
             }
         }
+        double rCut = 0.;
         SetParams setParams = new SetParams();
-        double ddd = setParams.getrCut();
-        System.out.println(ddd);
-        VecR region = new VecR(5, 5, 5);
-        System.out.println(region.x);
+        rCut = Math.pow(2., 1./6.);
+        System.out.println("rCut = " + rCut);
+        VecR region = new VecR();
+        System.out.println(region.x = 5.);
         VSCopy vsCopy = new VSCopy();
-        vsCopy.getVSCopy(region, 1./Math.sqrt(density), uCells);
+        vsCopy.VSCopy(region, 1./Math.sqrt(density), uCells);
         System.out.println(region.x + " " + region.y + " " + region.z);
+        Mol mol = new Mol();
+        mol.r.x = 3.4;
+        System.out.println(mol.r.x);
     }
 }
