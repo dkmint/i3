@@ -9,9 +9,9 @@ import java.util.IllegalFormatException;
 import java.util.InputMismatchException;
 import java.util.StringTokenizer;
 
-public class Io2 {
-    static Double deltaT, density, temperature;
-    static Integer stepAvg, stepEquil, stepInitlzTemp, stepLimit;
+public class Main {
+    public static Double deltaT, density, temperature, rCut;
+    public static Integer stepAvg, stepEquil, stepInitlzTemp, stepLimit;
     public static void main(String[] args) throws IOException {
         File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
@@ -127,5 +127,8 @@ public class Io2 {
                     break;
             }
         }
+        SetParams setParams = new SetParams();
+        double ddd = setParams.getrCut();
+        System.out.println(ddd);
     }
 }
