@@ -12,20 +12,34 @@ import java.util.StringTokenizer;
 //   то не должен принимать ввод юзера, пусть ему параметры передают в конструктор или метод.
 //   А он пусть возвращает значение, а не пишет
 //2) весь ввод выносим в один класс, сканнер должен быть как горец - только 1
-public class Main {
+public class Main<rCut> {
+    static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
+    static double dispHi, rNebrShell;
+    static VecI cells = new VecI();
+    static VecR region = new VecR();
+
     public static void main(String[] args) throws IOException {
+
         final int NDIM = 3;
-        double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
-        int stepAvg, stepEquil, stepInitlzTemp, stepLimit, nMol;
+
+        int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
+        int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
+        double kinEnInitSum;
+        double pertTrajDev;
+        int stepInitlzTemp;
+        int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
         ArrayList<Mol> mol = new ArrayList<>();
-        File pr = new File("/home/dmint/Desktop/pr_02_1.in");
+        File pr = new File("/home/dmint/Desktop/pr_03_5.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
+        ArrayList<Integer> cellList = new ArrayList<>();
+        ArrayList<Integer> nebrTab = new ArrayList<>();
+        ArrayList<Double> valTrajDev = new ArrayList<>();
         VecI initUcell = new VecI();
-        VecR region = new VecR();
+
         VecR vSum = new VecR();
         String line;
         String value = "";
@@ -46,10 +60,13 @@ public class Main {
                     if (description.equals("initUcell"))
                         throw new InputMismatchException("Few data! In line " + countLine);
                     value = stLine.nextToken();
-                    if (value.contains(".")) {
+                    if (value.contains(".") || value.contains("e-")) {
                         flag = 1;
                         nameR.add(new NameR(description, Double.parseDouble(value), flag));
                     }
+//                    else if (value.contains("e-")) {
+//                        nameR.add(new NameR(description, Double.parseDouble(value), flag));
+//                    }
                     else {
                         nameI.add(new NameI(description, Integer.parseInt(value)));
                     }
@@ -111,6 +128,12 @@ public class Main {
                 case "temperature":
                     temperature = nameR.get(i).getvValue();
                     break;
+                case "pertTrajDev":
+                    pertTrajDev = nameR.get(i).getvValue();
+                    break;
+                case "rNebrShell":
+                    rNebrShell = nameR.get(i).getvValue();
+                    break;
             }
         }
         for (int i = 0; i < nameI.size(); i ++) {
@@ -127,11 +150,34 @@ public class Main {
                 case "stepLimit" :
                     stepLimit = nameI.get(i).getvValue();
                     break;
+                case "limitTrajDev":
+                    limitTrajDev = nameI.get(i).getvValue();
+                    break;
+                case "nebrTabFac":
+                    nebrTabFac = nameI.get(i).getvValue();
+                    break;
+                case "stepTrajDev":
+                    stepTrajDev = nameI.get(i).getvValue();
+                    break;
             }
         }
         System.out.println("==================================");
+        System.out.println("density = " + density);
+        rCut = Math.pow(2., 1./6.);
+        VSCopy vsCopy = new VSCopy();
+        VProd vProd = new VProd();
+        vsCopy.VSCopy(region, 1./Math.pow(density / 4.,1./3.), initUcell);
+//        System.out.printf("%f %f %f\n", region.x, region.y, region.z);
+        nMol = 8 * vProd.VProd(initUcell);
+        velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
+
+//        vsCopy.VSCopy(cells, 1./(rCut + rNebrShell), region);
+//        System.out.println("velMag = " + velMag);
+//        System.out.println("nMol = " + nMol);
+//        System.out.println("vsCopy = " + vsCopy);
     }
-    VSCopy vsCopy = new VSCopy();
-    VProd vProd = new VProd();
-    int nMol;
+//    VSCopy vsCopy = new VSCopy();
+//    VProd vProd = new VProd();
+//    int nMol;
+
 }
