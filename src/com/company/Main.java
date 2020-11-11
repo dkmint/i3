@@ -17,7 +17,7 @@ public class Main {
         final int NDIM = 3;
         double deltaT, density, temperature, rCut, velMag;
         int stepAvg, stepEquil, stepInitlzTemp, stepLimit, nMol;
-        Mol mol = new Mol();
+        ArrayList<Mol> mol = new ArrayList<>();
         File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
         ArrayList<NameI> nameI = new ArrayList<>();
