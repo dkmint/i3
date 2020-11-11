@@ -15,23 +15,19 @@ import java.util.StringTokenizer;
 public class Main {
     public static void main(String[] args) throws IOException {
         final int NDIM = 3;
-        Double deltaT, density, temperature, rCut, velMag;
+        double deltaT, density, temperature, rCut, velMag;
         int stepAvg, stepEquil, stepInitlzTemp, stepLimit, nMol;
         Mol mol = new Mol();
         File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
-//        ArrayList<Double> param = new ArrayList<Double>();
-//        ArrayList<Integer> steps = new ArrayList<Integer>();
-//        ArrayList<String> descriptionName = new ArrayList<String>();
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
-//        UCell initUcell = new UCell();
         VecI initUcell = new VecI();
         VecR region = new VecR();
         String line;
-        String value = null;
-        String description = null;
-        String x = null, y = null, z = null;
+        String value = "";
+        String description = "";
+        String x = "", y = "", z = "";
         int countLine = 1;
         int countToken = 0;
         int flag = 0;
