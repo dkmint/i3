@@ -15,8 +15,10 @@ import java.util.StringTokenizer;
 public class Main {
     public static void main(String[] args) throws IOException {
         final int NDIM = 3;
-        double deltaT, density, temperature, rCut, velMag;
+        double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
         int stepAvg, stepEquil, stepInitlzTemp, stepLimit, nMol;
+        Prop kinEnergy = new Prop();
+        Prop totEnergy = new Prop();
         ArrayList<Mol> mol = new ArrayList<>();
         File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
@@ -24,6 +26,7 @@ public class Main {
         ArrayList<NameR> nameR = new ArrayList<>();
         VecI initUcell = new VecI();
         VecR region = new VecR();
+        VecR vSum = new VecR();
         String line;
         String value = "";
         String description = "";
