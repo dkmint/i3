@@ -13,25 +13,21 @@ import java.util.StringTokenizer;
 //   А он пусть возвращает значение, а не пишет
 //2) весь ввод выносим в один класс, сканнер должен быть как горец - только 1
 public class Main {
-
-
     public static void main(String[] args) throws IOException {
-        Double deltaT;
-        Double density;
-        Double temperature;
-        Integer stepAvg, stepEquil, stepInitlzTemp, stepLimit;
         final int NDIM = 3;
-        int nMol;
-        double rCut, velMag, region;
+        Double deltaT, density, temperature, rCut, velMag;
+        int stepAvg, stepEquil, stepInitlzTemp, stepLimit, nMol;
         Mol mol = new Mol();
         File pr = new File("/home/dmint/Desktop/pr_02_1.in");
         BufferedReader in = new BufferedReader(new FileReader(pr));
-        ArrayList<Double> param = new ArrayList<Double>();
-        ArrayList<Integer> steps = new ArrayList<Integer>();
-        ArrayList<String> descriptionName = new ArrayList<String>();
+//        ArrayList<Double> param = new ArrayList<Double>();
+//        ArrayList<Integer> steps = new ArrayList<Integer>();
+//        ArrayList<String> descriptionName = new ArrayList<String>();
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
-        UCell initUcell = new UCell();
+//        UCell initUcell = new UCell();
+        VecI initUcell = new VecI();
+        VecR region = new VecR();
         String line;
         String value = null;
         String description = null;
@@ -68,10 +64,8 @@ public class Main {
                         }
                         if (x.contains(".") || y.contains("."))
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
-                        initUcell.setName(description);
-                        initUcell.setX(Integer.parseInt(x));
-                        initUcell.setY(Integer.parseInt(y));
-                        initUcell.setSize(2);
+                        initUcell.x = Integer.parseInt(x);
+                        initUcell.y = Integer.parseInt(y);
                     }
                     else
                         throw new InputMismatchException("Too many data! In line " + countLine);
@@ -86,11 +80,9 @@ public class Main {
                         }
                         if (x.contains(".") || y.contains(".") || z.contains("."))
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
-                        initUcell.setName(description);
-                        initUcell.setX(Integer.parseInt(x));
-                        initUcell.setY(Integer.parseInt(y));
-                        initUcell.setZ(Integer.parseInt(x));
-                        initUcell.setSize(3);
+                        initUcell.x = Integer.parseInt(x);
+                        initUcell.y = Integer.parseInt(y);
+                        initUcell.z = Integer.parseInt(z);
                     }
                     else
                         throw new InputMismatchException("Too many data! In line " + countLine);
@@ -140,9 +132,7 @@ public class Main {
         }
         System.out.println("==================================");
     }
-
     VSCopy vsCopy = new VSCopy();
     VProd vProd = new VProd();
     int nMol;
-    
 }
