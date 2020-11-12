@@ -17,13 +17,14 @@ public class Main<rCut> {
     static double dispHi, rNebrShell;
     static VecI cells = new VecI();
     static VecR region = new VecR();
+    static int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
 
     public static void main(String[] args) throws IOException {
 
         final int NDIM = 3;
 
         int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
-        int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
+
         double kinEnInitSum;
         double pertTrajDev;
         int stepInitlzTemp;
@@ -172,8 +173,10 @@ public class Main<rCut> {
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
         vsCopy.VSCopyI(cells, 1./(rCut + rNebrShell), region);
         System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
+        nebrTabMax = nebrTabFac * nMol;
 //        System.out.println("velMag = " + velMag);
-//        System.out.println("nMol = " + nMol);
+        System.out.println("nMol = " + nMol);
+        System.out.println("nebrTabMax = " + nebrTabMax);
 //        System.out.println("vsCopy = " + vsCopy);
     }
 //    VSCopy vsCopy = new VSCopy();
