@@ -162,16 +162,16 @@ public class Main<rCut> {
             }
         }
         System.out.println("==================================");
-        System.out.println("density = " + density);
+//        System.out.println("density = " + density);
         rCut = Math.pow(2., 1./6.);
         VSCopy vsCopy = new VSCopy();
         VProd vProd = new VProd();
-        vsCopy.VSCopy(region, 1./Math.pow(density / 4.,1./3.), initUcell);
+        vsCopy.VSCopyR(region, 1./Math.pow(density / 4.,1./3.), initUcell);
 //        System.out.printf("%f %f %f\n", region.x, region.y, region.z);
         nMol = 8 * vProd.VProd(initUcell);
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
-
-//        vsCopy.VSCopy(cells, 1./(rCut + rNebrShell), region);
+        vsCopy.VSCopyI(cells, 1./(rCut + rNebrShell), region);
+        System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
 //        System.out.println("velMag = " + velMag);
 //        System.out.println("nMol = " + nMol);
 //        System.out.println("vsCopy = " + vsCopy);
