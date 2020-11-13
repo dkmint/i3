@@ -12,7 +12,7 @@ import java.util.StringTokenizer;
 //   то не должен принимать ввод юзера, пусть ему параметры передают в конструктор или метод.
 //   А он пусть возвращает значение, а не пишет
 //2) весь ввод выносим в один класс, сканнер должен быть как горец - только 1
-public class Main<rCut> {
+public class Main {
     static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
     static double dispHi, rNebrShell;
     static VecI cells = new VecI();
@@ -195,3 +195,4 @@ public class Main<rCut> {
 //    int nMol;
 
 }
+
