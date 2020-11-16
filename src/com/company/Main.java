@@ -164,21 +164,24 @@ public class Main {
             }
         }
         System.out.println("==================================");
-//        System.out.println("density = " + density);
         rCut = Math.pow(2., 1./6.);
-        Region region = new Region(1./Math.pow(density / 4.,1./3.), initUcell);
+        Region region = new Region(density, initUcell);
+        nMol = 8 * initUcell.volume();
+        velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
+        Cells cells = new Cells(rCut, rNebrShell, region);
+
+
+        System.out.printf("region is %f %f %f\n", region.x, region.y, region.z);
+        System.out.println("velMag = " + velMag);
+        System.out.println("nMol = " + nMol);
+        System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
+//        System.out.println("density = " + density);
 //        SetParams setParams = new SetParams();
 //        setParams.VSCopyR(region, 1./Math.pow(density / 4.,1./3.), );
-        System.out.printf("region is %f %f %f\n", region.x, region.y, region.z);
-        nMol = 8 * initUcell.volume();
 //        nMol = 8 * setParams.VProd(initUcell);
-//        velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
 //        setParams.VSCopyI(cells, 1./(rCut + rNebrShell), region);
-        System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
 //        nebrTabMax = nebrTabFac * nMol;
-//        System.out.println("velMag = " + velMag);
-        System.out.println("nMol = " + nMol);
-        System.out.println("nebrTabMax = " + nebrTabMax);
+//        System.out.println("nebrTabMax = " + nebrTabMax);
 //        System.out.println("vsCopy = " + vsCopy);
 
 //        setParams.VDiv(gap, region, initUcell);
