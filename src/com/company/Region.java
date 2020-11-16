@@ -2,10 +2,11 @@ package com.company;
 
 public class Region {
     double x, y, z;
+    InitUcell initUcell = new InitUcell();
 
-    public Region(double density, double x, double y, double z) {
-        this.x = 1./ Math.pow(density / 4., 1./3.) * x;
-        this.y = 1./ Math.pow(density / 4., 1./3.) * y;
-        this.z = 1./ Math.pow(density / 4., 1./3.) * z;
+    public Region(double density, InitUcell initUcell) {
+        this.x = 1./ Math.pow(density / 4., 1./3.) * initUcell.x;
+        this.y = 1./ Math.pow(density / 4., 1./3.) * initUcell.y;
+        this.z = 1./ Math.pow(density / 4., 1./3.) * initUcell.z;
     }
 }
