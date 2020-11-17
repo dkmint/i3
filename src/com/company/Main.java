@@ -19,7 +19,7 @@ public class Main {
     static VecR region = new VecR();
     static int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
     static VecR gap = new VecR();
-    static ArrayList<Mol> mol = new ArrayList<>();
+
 
 
     public static void main(String[] args) throws IOException {
@@ -42,8 +42,8 @@ public class Main {
         ArrayList<Integer> cellList = new ArrayList<>();
         ArrayList<Integer> nebrTab = new ArrayList<>();
         ArrayList<Double> valTrajDev = new ArrayList<>();
-//        VecI initUcell = new VecI();
-        InitUcell initUcell = new InitUcell();
+        VecI initUcell = new VecI();
+//        InitUcell initUcell = new InitUcell();
 
         VecR vSum = new VecR();
         String line;
@@ -164,24 +164,34 @@ public class Main {
             }
         }
         System.out.println("==================================");
+//  SetParams()
         rCut = Math.pow(2., 1./6.);
         Region region = new Region(density, initUcell);
         nMol = 8 * initUcell.volume();
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
         Cells cells = new Cells(rCut, rNebrShell, region);
-
+        nebrTabMax = nebrTabFac * nMol;
+//  SetUpJob()
+        stepCount = 0;
+        ArrayList<Mol> mol = new ArrayList<>();
+        for (int i = 0; i < nMol; i ++) {
+            mol.add(new Mol(region, initUcell));
+            System.out.printf("mol.get(%d) = %5.4f\n", i, mol.get(i).r);
+        }
+//        InitCoords initCoords = new InitCoords();
+//        initCoords.getCoords(initUcell);
 
         System.out.printf("region is %f %f %f\n", region.x, region.y, region.z);
         System.out.println("velMag = " + velMag);
         System.out.println("nMol = " + nMol);
         System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
+        System.out.println("nebrTabMax = " + nebrTabMax);
 //        System.out.println("density = " + density);
 //        SetParams setParams = new SetParams();
 //        setParams.VSCopyR(region, 1./Math.pow(density / 4.,1./3.), );
 //        nMol = 8 * setParams.VProd(initUcell);
 //        setParams.VSCopyI(cells, 1./(rCut + rNebrShell), region);
 //        nebrTabMax = nebrTabFac * nMol;
-//        System.out.println("nebrTabMax = " + nebrTabMax);
 //        System.out.println("vsCopy = " + vsCopy);
 
 //        setParams.VDiv(gap, region, initUcell);
@@ -190,11 +200,11 @@ public class Main {
         VecR rs = new VecR();
 //        ArrayList<NameR> nameR = new ArrayList<>();
 //        nameR.add(new NameR(description, Double.parseDouble(value), flag));
-        mol.add(new Mol());
-        mol.get(0).setR(1., 2., 3.);
+//        mol.add(new Mol());
+//        mol.get(0).setR(1., 2., 3.);
 //        System.out.println("mol is " + mol.get(0));
 //        setParams.VSet(mol.add(new Mol().r), 1, 2, 3);
-        System.out.printf("Positions of 1st mol is %f %f %f\n", mol.get(0).r.x, mol.get(0).r.y, mol.get(0).r.z);
+//        System.out.printf("Positions of 1st mol is %f %f %f\n", mol.get(0).x, mol.get(0).y, mol.get(0).z);
     }
 //    VSCopy vsCopy = new VSCopy();
 //    VProd vProd = new VProd();
