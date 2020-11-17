@@ -1,9 +1,6 @@
 package com.company;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.InputMismatchException;
@@ -15,35 +12,34 @@ import java.util.StringTokenizer;
 public class Main {
     static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
     static double dispHi, rNebrShell;
-    static VecI cells = new VecI();
-    static VecR region = new VecR();
     static int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
-    static VecR gap = new VecR();
-
-
 
     public static void main(String[] args) throws IOException {
-
 
         final int NDIM = 3;
 
         int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
-
+//        VecI cells = new VecI();
+//        VecR region = new VecR();
         double kinEnInitSum;
+
         double pertTrajDev;
+//        VecR gap = new VecR();
         int stepInitlzTemp;
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
         File pr = new File("/home/dmint/Desktop/pr_03_5.in");
+        File outFile = new File("coords.d");
+        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(outFile)));
         BufferedReader in = new BufferedReader(new FileReader(pr));
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
         ArrayList<Integer> cellList = new ArrayList<>();
         ArrayList<Integer> nebrTab = new ArrayList<>();
         ArrayList<Double> valTrajDev = new ArrayList<>();
-        VecI initUcell = new VecI();
-//        InitUcell initUcell = new InitUcell();
+        ArrayList<Mol> mol = new ArrayList<>();
+        InitUcell initUcell = new InitUcell();
 
         VecR vSum = new VecR();
         String line;
@@ -80,13 +76,15 @@ public class Main {
                             x = stLine.nextToken();
                             y = stLine.nextToken();
                         }
-                        if (x.contains(".") || y.contains("."))
+                        if (x.contains(".") || y.contains(".")) {
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
+                        }
                         initUcell.x = Integer.parseInt(x);
                         initUcell.y = Integer.parseInt(y);
                     }
-                    else
+                    else {
                         throw new InputMismatchException("Too many data! In line " + countLine);
+                    }
                     break;
                 case 4:
                     description = stLine.nextToken();
@@ -96,14 +94,16 @@ public class Main {
                             y = stLine.nextToken();
                             z = stLine.nextToken();
                         }
-                        if (x.contains(".") || y.contains(".") || z.contains("."))
+                        if (x.contains(".") || y.contains(".") || z.contains(".")) {
                             throw new InputMismatchException("Parameters of initUcell must be integers!");
+                        }
                         initUcell.x = Integer.parseInt(x);
                         initUcell.y = Integer.parseInt(y);
                         initUcell.z = Integer.parseInt(z);
                     }
-                    else
+                    else {
                         throw new InputMismatchException("Too many data! In line " + countLine);
+                    }
                     break;
                 case 5:
                     throw new InputMismatchException("Too many data! In line " + countLine);
@@ -111,10 +111,12 @@ public class Main {
             if (countToken == 2) {
                 System.out.println(description + "\t\t" + value);
             }
-            else if (countToken == 3)
+            else if (countToken == 3) {
                 System.out.println(description + "\t" + x + " " + y);
-            else if (countToken == 4)
+            }
+            else if (countToken == 4) {
                 System.out.println(description + "\t" + x + " " + y + " " + z);
+            }
             countLine ++;
             flag = 0;
         }
@@ -171,44 +173,31 @@ public class Main {
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
         Cells cells = new Cells(rCut, rNebrShell, region);
         nebrTabMax = nebrTabFac * nMol;
-//  SetUpJob()
+
+//  SetUpJob(InitCoords)
         stepCount = 0;
-        ArrayList<Mol> mol = new ArrayList<>();
-        for (int i = 0; i < nMol; i ++) {
-            mol.add(new Mol(region, initUcell));
-            System.out.printf("mol.get(%d) = %5.4f\n", i, mol.get(i).r);
+        Gap gap = new Gap(region, initUcell);
+        Coords coords = new Coords();
+        int nn = nMol / 8;
+        out.printf("%s\nC\n", Integer.toString(nn));
+        int n = 0;
+        for (int nz = 0; nz < initUcell.z; nz ++) {
+            for (int ny = 0; ny < initUcell.y; ny ++) {
+                for (int nx = 0; nx < initUcell.x; nx ++) {
+                    coords.setInitCoords(nx + 0.5, ny + 0.5, nz + 0.5);
+                    coords.setCoordsGap(gap);
+                    coords.setCoordsRegion(-0.5, region);
+                    mol.add(new Mol());
+                    mol.get(n).r.x = coords.x;
+                    mol.get(n).r.z = coords.z;
+                    mol.get(n).r.y = coords.y;
+                    System.out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
+                    out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
+                    n ++;
+                }
+            }
         }
-//        InitCoords initCoords = new InitCoords();
-//        initCoords.getCoords(initUcell);
-
-        System.out.printf("region is %f %f %f\n", region.x, region.y, region.z);
-        System.out.println("velMag = " + velMag);
-        System.out.println("nMol = " + nMol);
-        System.out.printf("Cells are %d %d %d\n", cells.x, cells.y, cells.z);
-        System.out.println("nebrTabMax = " + nebrTabMax);
-//        System.out.println("density = " + density);
-//        SetParams setParams = new SetParams();
-//        setParams.VSCopyR(region, 1./Math.pow(density / 4.,1./3.), );
-//        nMol = 8 * setParams.VProd(initUcell);
-//        setParams.VSCopyI(cells, 1./(rCut + rNebrShell), region);
-//        nebrTabMax = nebrTabFac * nMol;
-//        System.out.println("vsCopy = " + vsCopy);
-
-//        setParams.VDiv(gap, region, initUcell);
-//        System.out.printf("Gaps are %f %f %f\n", gap.x, gap.y, gap.z);
-
-        VecR rs = new VecR();
-//        ArrayList<NameR> nameR = new ArrayList<>();
-//        nameR.add(new NameR(description, Double.parseDouble(value), flag));
-//        mol.add(new Mol());
-//        mol.get(0).setR(1., 2., 3.);
-//        System.out.println("mol is " + mol.get(0));
-//        setParams.VSet(mol.add(new Mol().r), 1, 2, 3);
-//        System.out.printf("Positions of 1st mol is %f %f %f\n", mol.get(0).x, mol.get(0).y, mol.get(0).z);
+        out.close();
     }
-//    VSCopy vsCopy = new VSCopy();
-//    VProd vProd = new VProd();
-//    int nMol;
-
 }
 
