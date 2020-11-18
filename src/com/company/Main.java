@@ -19,12 +19,8 @@ public class Main {
         final int NDIM = 3;
 
         int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
-//        VecI cells = new VecI();
-//        VecR region = new VecR();
         double kinEnInitSum;
-
         double pertTrajDev;
-//        VecR gap = new VecR();
         int stepInitlzTemp;
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
@@ -198,6 +194,7 @@ public class Main {
             }
         }
         out.close();
+        System.out.println("nMol = " + nMol);
     }
 }
 
