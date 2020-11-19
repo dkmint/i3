@@ -25,12 +25,16 @@ public class Main {
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
+
         File inFile = new File("/home/dmint/Desktop/pr_03_5.in");
         File outFile1 = new File("coords.d");
-        File outFile2 = new File("randSeedP.d");
-        PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1)));
-        PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2)));
+        File outFile2 = new File("gpcoords.d");
+        File outFile3 = new File("velocities.d");
         BufferedReader in = new BufferedReader(new FileReader(inFile));
+        PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol
+        PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2))); //gnuplot
+        PrintWriter out3 = new PrintWriter(new BufferedWriter(new FileWriter(outFile3))); //gnuplot
+
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
         ArrayList<Integer> cellList = new ArrayList<>();
@@ -177,7 +181,7 @@ public class Main {
         Gap gap = new Gap(region, initUcell);
         Coords coords = new Coords();
         int nn = nMol / 8;
-        out1.printf("%s\nC\n", Integer.toString(nn));
+        out1.printf("%s\nC\n", Integer.toString(nn)); // jmol
         int n = 0;
         for (int nz = 0; nz < initUcell.z; nz ++) {
             for (int ny = 0; ny < initUcell.y; ny ++) {
@@ -190,13 +194,13 @@ public class Main {
                     mol.get(n).r.z = coords.z;
                     mol.get(n).r.y = coords.y;
 //                    System.out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
-//                    out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
+//                    out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                    out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
                     n ++;
                 }
             }
         }
         InitVels initVels = new InitVels();
-
         for (int i = 0; i < nMol; i ++) {
             mol.add(new Mol());
             initVels.vRand();
@@ -204,11 +208,11 @@ public class Main {
             mol.get(i).rv.y = initVels.y;
             mol.get(i).rv.z = initVels.z;
             System.out.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
-            out2.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
         }
-        out1.close();
-        out2.close();
+        out1.close(); //jmol coords.d
+        out2.close(); //gnuplot gcoords.d
+        out3.close(); //gnuplot velocities.d
         System.out.println("nMol = " + nMol);
     }
 }
-
