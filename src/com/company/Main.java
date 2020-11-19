@@ -30,7 +30,7 @@ public class Main {
         File outFile1 = new File("coords.d");
         File outFile2 = new File("gpcoords.d");
         File outFile3 = new File("velocities.d");
-//        File outFile4 = new File("velocityScale.d");
+//        File outFile4 = new File("veloSum.d");
 
         BufferedReader in = new BufferedReader(new FileReader(inFile));
         PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol
@@ -46,7 +46,7 @@ public class Main {
         ArrayList<Mol> mol = new ArrayList<>();
         InitUcell initUcell = new InitUcell();
 
-        VecR vSum = new VecR();
+        VeloSum veloSum = new VeloSum();
         String line;
         String value = "";
         String description = "";
@@ -204,7 +204,9 @@ public class Main {
                 }
             }
         }
+//        SetUpJobs InitVels()
         InitVels initVels = new InitVels();
+        veloSum.setZeroR();
         for (int i = 0; i < nMol; i ++) {
             mol.add(new Mol());
             initVels.vRand();
@@ -214,7 +216,10 @@ public class Main {
             mol.get(i).rv.z = initVels.z;
             out3.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            veloSum.setVAdd(mol.get(i).rv);
         }
+//        out4.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z); // veloSum.d
+        System.out.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
         out1.close(); //jmol coords.d
         out2.close(); //gnuplot gcoords.d
         out3.close(); //gnuplot velocityScale.d

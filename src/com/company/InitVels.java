@@ -38,4 +38,10 @@ public class InitVels {
         this.y = this.y * velMag;
         this.z = this.z * velMag;
     }
+    public void setAdd(VecR a, VecR b) {
+        this.x = a.x + b.x;
+        this.y = a.y + a.z;
+        this.z = a.z + a.z;
+    }
+
 }
