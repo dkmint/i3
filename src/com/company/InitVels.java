@@ -23,18 +23,19 @@ public class InitVels {
     void vRand ()
     {
         s = 2.;
-//        for (int i = 0; i < mol.size(); i ++) {
             while (s > 1.) {
                 x = 2. * randR () - 1.;
                 y = 2. * randR () - 1.;
                 s = x * x + y * y;
             }
-
             this.z = 1. - 2. * s;
             s = 2. * Math.sqrt(1. - s);
             this.x = s * x;
             this.y = s * y;
-//        }
     }
-
+    public void setVScale(double velMag) {
+        this.x = this.x * velMag;
+        this.y = this.y * velMag;
+        this.z = this.z * velMag;
+    }
 }

@@ -30,10 +30,13 @@ public class Main {
         File outFile1 = new File("coords.d");
         File outFile2 = new File("gpcoords.d");
         File outFile3 = new File("velocities.d");
+//        File outFile4 = new File("velocityScale.d");
+
         BufferedReader in = new BufferedReader(new FileReader(inFile));
         PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol
         PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2))); //gnuplot
         PrintWriter out3 = new PrintWriter(new BufferedWriter(new FileWriter(outFile3))); //gnuplot
+//        PrintWriter out4 = new PrintWriter(new BufferedWriter(new FileWriter(outFile4))); //gnuplot
 
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
@@ -173,6 +176,7 @@ public class Main {
         Region region = new Region(density, initUcell);
         nMol = 8 * initUcell.volume();
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
+//        System.out.println("velMag = " + velMag);
         Cells cells = new Cells(rCut, rNebrShell, region);
         nebrTabMax = nebrTabFac * nMol;
 
@@ -204,15 +208,17 @@ public class Main {
         for (int i = 0; i < nMol; i ++) {
             mol.add(new Mol());
             initVels.vRand();
+            initVels.setVScale(velMag);
             mol.get(i).rv.x = initVels.x;
             mol.get(i).rv.y = initVels.y;
             mol.get(i).rv.z = initVels.z;
-            System.out.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
-            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            out3.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+//            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
         }
         out1.close(); //jmol coords.d
         out2.close(); //gnuplot gcoords.d
-        out3.close(); //gnuplot velocities.d
+        out3.close(); //gnuplot velocityScale.d
+//        out4.close(); //gnuplot
         System.out.println("nMol = " + nMol);
     }
 }
