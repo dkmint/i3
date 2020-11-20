@@ -4,6 +4,7 @@ public class Mol {
     VecR r = new VecR();
     VecR rv = new VecR();
     VecR ra = new VecR();
+
     public void setZeroR() {
         this.r.x = 0;
         this.r.y = 0;

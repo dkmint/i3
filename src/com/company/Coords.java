@@ -2,6 +2,7 @@ package com.company;
 
 public class Coords {
     double x, y, z;
+    double gapX, gapY, gapZ;
 //    ArrayList<Mol> mol = new ArrayList<>();
 
     public Coords() {
@@ -14,10 +15,15 @@ public class Coords {
         this.y = y;
         this.z = z;
     }
-    public void setCoordsGap(Gap gap) {
-        this.x = this.x * gap.x;
-        this.y = this.y * gap.y;
-        this.z = this.z * gap.z;
+    public void setGap(Region v2, InitUcell v3) {
+        this.gapX = v2.x / v3.x;;
+        this.gapY = v2.y / v3.y;;
+        this.gapZ = v2.z / v3.z;;
+    }
+    public void setCoordsGap() {
+        this.x = this.x * gapX;
+        this.y = this.y * gapY;
+        this.z = this.z * gapZ;
     }
     public void setCoordsRegion(double s2, Region region) {
         this.x = this.x + s2 + region.x;

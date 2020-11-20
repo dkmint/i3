@@ -13,6 +13,7 @@ public class Main {
     static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
     static double dispHi, rNebrShell;
     static int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
+    static int stepAvg, stepEquil, stepLimit, nMol, stepCount;
 
     public static void main(String[] args) throws IOException {
 
@@ -32,14 +33,19 @@ public class Main {
         File inFile = new File("pr_03_2.in");
         File outFile1 = new File("coords.d");
         File outFile2 = new File("gpcoords.d");
-        File outFile3 = new File("veloScale.d");
+        File outFile3 = new File("velo.d");
         File outFile4 = new File("veloAvg.d");
+        File outFile5 = new File("coordsStep1.d");
+        File outFile6 = new File("veloStep1.d");
+
 
         BufferedReader in = new BufferedReader(new FileReader(inFile));
-        PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol
-        PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2))); //gnuplot
+        PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol coords.d
+        PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2))); //gpcoords.d
         PrintWriter out3 = new PrintWriter(new BufferedWriter(new FileWriter(outFile3))); //gnuplot
         PrintWriter out4 = new PrintWriter(new BufferedWriter(new FileWriter(outFile4))); //gnuplot
+        PrintWriter out5 = new PrintWriter(new BufferedWriter(new FileWriter(outFile5))); //gnuplot
+        PrintWriter out6 = new PrintWriter(new BufferedWriter(new FileWriter(outFile6))); //gnuplot
 
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
@@ -50,6 +56,7 @@ public class Main {
         InitUcell initUcell = new InitUcell();
 
         VeloSum veloSum = new VeloSum();
+        CalcMet calcMet = new CalcMet();
         String line;
         String value = "";
         String description = "";
@@ -179,43 +186,48 @@ public class Main {
         System.out.println("==================================");
 //  SetParams()
         rCut = Math.pow(2., 1./6.);
-        Region region = new Region(density, initUcell);
-        nMol = 8 * initUcell.volume();
-        velMag = Math.sqrt(NDIM * (1./nMol) * temperature);
-//        System.out.println("velMag = " + velMag);
+        Region region = new Region(density, initUcell, "diamand");
+//        region.setnMol();
+        nMol = region.nMol;
+        System.out.println("nMol = " + nMol);
+        System.out.printf("region = %f %f %f\n", region.x, region.y, region.z);
+        velMag = Math.sqrt(NDIM * (1./nMol) * temperature); //        System.out.println("velMag = " + velMag);
         Cells cells = new Cells(rCut, rNebrShell, region);
+        System.out.printf("cells = %d %d %d\n", cells.x, cells.y, cells.z);
         nebrTabMax = nebrTabFac * nMol;
 
 //  SetUpJob(InitCoords)
         stepCount = 0;
-        Gap gap = new Gap(region, initUcell);
         Coords coords = new Coords();
-        int nn = nMol / 8;
-        out1.printf("%s\nC\n", Integer.toString(nn)); // jmol
+        coords.setGap(region, initUcell);
+        System.out.printf("gap = %f %f %f\n", coords.gapX, coords.gapY, coords.gapZ);
+        out1.printf("%s\nC\n", Integer.toString(nMol)); // jmol coords.d
         int n = 0;
         for (int nz = 0; nz < initUcell.z; nz ++) {
             for (int ny = 0; ny < initUcell.y; ny ++) {
                 for (int nx = 0; nx < initUcell.x; nx ++) {
                     coords.setInitCoords(nx + 0.5, ny + 0.5, nz + 0.5);
-                    coords.setCoordsGap(gap);
+                    coords.setCoordsGap();
                     coords.setCoordsRegion(-0.5, region);
                     mol.add(new Mol());
                     mol.get(n).r.x = coords.x;
                     mol.get(n).r.z = coords.z;
                     mol.get(n).r.y = coords.y;
 //                    System.out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
-//                    out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                    out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
                     out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
                     n ++;
                 }
             }
         }
+
 //        SetUpJobs InitVels()
         InitVels initVels = new InitVels();
         veloSum.setZeroR();
+        System.out.printf("nMol = %d\n", nMol);
         for (int i = 0; i < nMol; i ++) {
             mol.add(new Mol());
-            initVels.vRand();
+//            initVels.vRand();
             initVels.setVScale(velMag);
             mol.get(i).rv.x = initVels.x;
             mol.get(i).rv.y = initVels.y;
@@ -224,6 +236,7 @@ public class Main {
 //            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
             veloSum.setVAdd(mol.get(i).rv);
         }
+
         System.out.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
         for (int i = 0; i < mol.size(); i ++) {
             mol.get(i).setAvgVel(- 1. / nMol, veloSum);
@@ -234,6 +247,7 @@ public class Main {
             mol.get(i).setZeroRA();
 //            System.out.printf("mol.ra = %f %f %f\n", mol.get(i).ra.x, mol.get(i).ra.y, mol.get(i).ra.z);
         }
+
 // AccumProps()
         totEnergy.propZero();
         kinEnergy.propZero();
@@ -245,7 +259,19 @@ public class Main {
         while (moreCycles) {
             ++ stepCount;
             timeNow = stepCount * deltaT;
+            for (int i = 0; i < mol.size(); i ++) {
+//                mol.add(new Mol());
+                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
+                mol.get(i).rv.x = calcMet.x;
+                mol.get(i).rv.y = calcMet.y;
+                mol.get(i).rv.z = calcMet.z;
 
+//                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
+//                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+//                out5.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            }
+            moreCycles = false;
         }
 //        System.out.printf("totEnergy %f %f\n", totEnergy.sum, totEnergy.sum2);
 //        System.out.printf("kinEnergy %f %f\n", kinEnergy.sum, kinEnergy.sum2);
@@ -254,6 +280,8 @@ public class Main {
         out2.close(); //gnuplot gcoords.d
         out3.close(); //gnuplot velocityScale.d
         out4.close(); //gnuplot
+        out5.close();
+        out6.close();
         System.out.println("nMol = " + nMol);
     }
 }
