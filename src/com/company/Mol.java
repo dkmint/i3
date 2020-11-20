@@ -19,4 +19,10 @@ public class Mol {
         this.ra.y = 0;
         this.ra.z = 0;
     }
+    public void setAvgVel(double d, VeloSum s) {
+        this.rv.x += d * s.x;
+        this.rv.y += d * s.y;
+        this.rv.z += d * s.z;
+    }
+
 }

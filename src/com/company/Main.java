@@ -21,22 +21,23 @@ public class Main {
         int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
         double kinEnInitSum;
         double pertTrajDev;
-        int stepInitlzTemp;
+        int stepInitlzTemp, randSeed;
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
 
-        File inFile = new File("/home/dmint/Desktop/pr_03_5.in");
+//        File inFile = new File("/home/dmint/Desktop/pr_03_5.in");
+        File inFile = new File("pr_03_2.in");
         File outFile1 = new File("coords.d");
         File outFile2 = new File("gpcoords.d");
-        File outFile3 = new File("velocities.d");
-//        File outFile4 = new File("veloSum.d");
+        File outFile3 = new File("veloScale.d");
+        File outFile4 = new File("veloAvg.d");
 
         BufferedReader in = new BufferedReader(new FileReader(inFile));
         PrintWriter out1 = new PrintWriter(new BufferedWriter(new FileWriter(outFile1))); //jmol
         PrintWriter out2 = new PrintWriter(new BufferedWriter(new FileWriter(outFile2))); //gnuplot
         PrintWriter out3 = new PrintWriter(new BufferedWriter(new FileWriter(outFile3))); //gnuplot
-//        PrintWriter out4 = new PrintWriter(new BufferedWriter(new FileWriter(outFile4))); //gnuplot
+        PrintWriter out4 = new PrintWriter(new BufferedWriter(new FileWriter(outFile4))); //gnuplot
 
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
@@ -168,6 +169,9 @@ public class Main {
                 case "stepTrajDev":
                     stepTrajDev = nameI.get(i).getvValue();
                     break;
+                case "randSeed":
+                    randSeed = nameI.get(i).getvValue();
+                    break;
             }
         }
         System.out.println("==================================");
@@ -218,12 +222,21 @@ public class Main {
 //            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
             veloSum.setVAdd(mol.get(i).rv);
         }
-//        out4.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z); // veloSum.d
         System.out.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
+        for (int i = 0; i < mol.size(); i ++) {
+            mol.get(i).setAvgVel(- 1. / nMol, veloSum);
+            out4.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+        }
+//        InitAccels()
+        for (int i = 0; i < mol.size(); i ++) {
+            mol.get(i).setZeroRA();
+//            System.out.printf("mol.ra = %f %f %f\n", mol.get(i).ra.x, mol.get(i).ra.y, mol.get(i).ra.z);
+        }
+
         out1.close(); //jmol coords.d
         out2.close(); //gnuplot gcoords.d
         out3.close(); //gnuplot velocityScale.d
-//        out4.close(); //gnuplot
+        out4.close(); //gnuplot
         System.out.println("nMol = " + nMol);
     }
 }
