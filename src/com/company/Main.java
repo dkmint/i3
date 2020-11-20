@@ -17,14 +17,16 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         final int NDIM = 3;
+        boolean moreCycles;
 
-        int stepAvg, stepEquil, stepLimit, nMol, moreCycles, stepCount;
+        int stepAvg, stepEquil, stepLimit, nMol, stepCount;
         double kinEnInitSum;
         double pertTrajDev;
         int stepInitlzTemp, randSeed;
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
+        Prop pressure = new Prop();
 
 //        File inFile = new File("/home/dmint/Desktop/pr_03_5.in");
         File inFile = new File("pr_03_2.in");
@@ -232,7 +234,22 @@ public class Main {
             mol.get(i).setZeroRA();
 //            System.out.printf("mol.ra = %f %f %f\n", mol.get(i).ra.x, mol.get(i).ra.y, mol.get(i).ra.z);
         }
+// AccumProps()
+        totEnergy.propZero();
+        kinEnergy.propZero();
+        pressure.propZero();
+        kinEnInitSum = 0.;
+        nebrNow = 1;
+//============= End of SetUpJobs() =========================
+        moreCycles = true;
+        while (moreCycles) {
+            ++ stepCount;
+            timeNow = stepCount * deltaT;
 
+        }
+//        System.out.printf("totEnergy %f %f\n", totEnergy.sum, totEnergy.sum2);
+//        System.out.printf("kinEnergy %f %f\n", kinEnergy.sum, kinEnergy.sum2);
+//        System.out.printf("pressure %f %f\n", pressure.sum, pressure.sum2);
         out1.close(); //jmol coords.d
         out2.close(); //gnuplot gcoords.d
         out3.close(); //gnuplot velocityScale.d
