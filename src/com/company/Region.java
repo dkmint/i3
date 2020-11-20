@@ -18,24 +18,28 @@ public class Region {
             this.y = 1. / Math.pow(density / 4., 1. / 3.) * initUcell.y;
             this.z = 1. / Math.pow(density / 4., 1. / 3.) * initUcell.z;
             this.nMol = 4 * initUcell.volume();
+            this.structName = structName;
         }
         else if (structName.equals("bcc")) {
             this.x = 1. / Math.pow(density / 2., 1. / 3.) * initUcell.x;
             this.y = 1. / Math.pow(density / 2., 1. / 3.) * initUcell.y;
             this.z = 1. / Math.pow(density / 2., 1. / 3.) * initUcell.z;
             this.nMol = 2 * initUcell.volume();
+            this.structName = structName;
         }
         else if (structName.equals("sc")) {
             this.x = 1. / Math.pow(density, 1. / 3.) * initUcell.x;
             this.y = 1. / Math.pow(density, 1. / 3.) * initUcell.y;
             this.z = 1. / Math.pow(density, 1. / 3.) * initUcell.z;
             this.nMol = initUcell.volume();
+            this.structName = structName;
         }
-        else if (structName.equals("diamand")) {
+        else if (structName.equals("diamond")) {
             this.x = 1. / Math.pow(density / 8., 1. / 3.) * initUcell.x;
             this.y = 1. / Math.pow(density / 8., 1. / 3.) * initUcell.y;
             this.z = 1. / Math.pow(density / 8., 1. / 3.) * initUcell.z;
             this.nMol = 8 * initUcell.volume();
+            this.structName = structName;
         }
     }
 }

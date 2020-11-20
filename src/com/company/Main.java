@@ -186,10 +186,13 @@ public class Main {
         System.out.println("==================================");
 //  SetParams()
         rCut = Math.pow(2., 1./6.);
-        Region region = new Region(density, initUcell, "diamand");
+//        Region region = new Region(density, initUcell, "sc");
+//        Region region = new Region(density, initUcell, "bcc");
+//        Region region = new Region(density, initUcell, "fcc");
+        Region region = new Region(density, initUcell, "diamond");
 //        region.setnMol();
         nMol = region.nMol;
-        System.out.println("nMol = " + nMol);
+        System.out.println("structName = " + region.structName);
         System.out.printf("region = %f %f %f\n", region.x, region.y, region.z);
         velMag = Math.sqrt(NDIM * (1./nMol) * temperature); //        System.out.println("velMag = " + velMag);
         Cells cells = new Cells(rCut, rNebrShell, region);
@@ -199,28 +202,126 @@ public class Main {
 //  SetUpJob(InitCoords)
         stepCount = 0;
         Coords coords = new Coords();
-        coords.setGap(region, initUcell);
+
         System.out.printf("gap = %f %f %f\n", coords.gapX, coords.gapY, coords.gapZ);
         out1.printf("%s\nC\n", Integer.toString(nMol)); // jmol coords.d
-        int n = 0;
-        for (int nz = 0; nz < initUcell.z; nz ++) {
-            for (int ny = 0; ny < initUcell.y; ny ++) {
-                for (int nx = 0; nx < initUcell.x; nx ++) {
-                    coords.setInitCoords(nx + 0.5, ny + 0.5, nz + 0.5);
-                    coords.setCoordsGap();
-                    coords.setCoordsRegion(-0.5, region);
-                    mol.add(new Mol());
-                    mol.get(n).r.x = coords.x;
-                    mol.get(n).r.z = coords.z;
-                    mol.get(n).r.y = coords.y;
+//        System.out.println("Hello from coords!");
+//        coords.setStructure();
+        System.out.printf("coords = %f %f %f\n", coords.x, coords.y, coords.z);
+        if (region.structName.equals("sc")) {
+            coords.setGap(region, initUcell);
+            int n = 0;
+            for (int nz = 0; nz < initUcell.z; nz++) {
+                for (int ny = 0; ny < initUcell.y; ny++) {
+                    for (int nx = 0; nx < initUcell.x; nx++) {
+                        coords.setInitCoords(nx + 0.5, ny + 0.5, nz + 0.5);
+                        coords.setCoordsGap();
+                        coords.setCoordsRegion(-0.5, region);
+                        mol.add(new Mol());
+                        mol.get(n).r.x = coords.x;
+                        mol.get(n).r.z = coords.z;
+                        mol.get(n).r.y = coords.y;
 //                    System.out.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z);
-                    out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
-                    out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
-                    n ++;
+                        out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                        out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
+                        n++;
+                    }
                 }
             }
         }
-
+        else if (region.structName.equals("bcc")) {
+            coords.setGap(region, initUcell);
+            int n = 0;
+            for (int nz = 0; nz < initUcell.z; nz++) {
+                for (int ny = 0; ny < initUcell.y; ny++) {
+                    for (int nx = 0; nx < initUcell.x; nx++) {
+                        coords.setInitCoords(nx + 0.25, ny + 0.25, nz + 0.25);
+                        coords.setCoordsGap();
+                        coords.setCoordsRegion(-0.5, region);
+                        for (int j = 0; j < 2; j ++) {
+                            mol.add(new Mol());
+                            mol.get(n).r.x = coords.x;
+                            mol.get(n).r.z = coords.z;
+                            mol.get(n).r.y = coords.y;
+                            if (j == 1) {
+                                mol.get(n).r.x += 0.5 + coords.gapX;
+                                mol.get(n).r.z += 0.5 + coords.gapY;
+                                mol.get(n).r.y += 0.5 + coords.gapZ;
+                            }
+                            out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                            out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
+                            n++;
+                        }
+                    }
+                }
+            }
+        }
+        else if (region.structName.equals("fcc")) {
+            coords.setGap(region, initUcell);
+            int n = 0;
+            for (int nz = 0; nz < initUcell.z; nz++) {
+                for (int ny = 0; ny < initUcell.y; ny++) {
+                    for (int nx = 0; nx < initUcell.x; nx++) {
+                        coords.setInitCoords(nx + 0.25, ny + 0.25, nz + 0.25);
+                        coords.setCoordsGap();
+                        coords.setCoordsRegion(-0.5, region);
+                        for (int j = 0; j < 4; j ++) {
+                            mol.add(new Mol());
+                            mol.get(n).r.x = coords.x;
+                            mol.get(n).r.z = coords.z;
+                            mol.get(n).r.y = coords.y;
+                            if (j != 3) {
+                                if (j != 0)
+                                    mol.get(n).r.x += 0.5 * coords.gapX;
+                                if (j != 1)
+                                    mol.get(n).r.y += 0.5 * coords.gapY;
+                                if (j != 2)
+                                    mol.get(n).r.z += 0.5 * coords.gapZ;
+                            }
+                            out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                            out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
+                            n++;
+                        }
+                    }
+                }
+            }
+        }
+        else if (region.structName.equals("diamond")) {
+            double subShift;
+            coords.setGap(region, initUcell);
+            int n = 0;
+            for (int nz = 0; nz < initUcell.z; nz++) {
+                for (int ny = 0; ny < initUcell.y; ny++) {
+                    for (int nx = 0; nx < initUcell.x; nx++) {
+                        coords.setInitCoords(nx + 0.125, ny + 0.125, nz + 0.125);
+                        coords.setCoordsGap();
+                        coords.setCoordsRegion(-0.5, region);
+                        for (int m = 0; m < 2; m ++) {
+                            subShift = (m == 1) ? 0.25 : 0.;
+                            for (int j = 0; j < 4; j ++) {
+                                mol.add(new Mol());
+                                mol.get(n).r.x = coords.x + subShift * coords.gapX;
+                                mol.get(n).r.y = coords.y + subShift * coords.gapY;
+                                mol.get(n).r.z = coords.z + subShift * coords.gapZ;
+                                if (j != 3) {
+                                    if (j != 0)
+                                        mol.get(n).r.x += 0.5 * coords.gapX;
+                                    if (j != 1)
+                                        mol.get(n).r.y += 0.5 * coords.gapY;
+                                    if (j != 2)
+                                        mol.get(n).r.z += 0.5 * coords.gapZ;
+                                }
+                                out1.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                                out2.printf("%f %f %f\n", mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // gnuplot
+                                n++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+            System.out.println("Error! Wrong Structure!");
 //        SetUpJobs InitVels()
         InitVels initVels = new InitVels();
         veloSum.setZeroR();
