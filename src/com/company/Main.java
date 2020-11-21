@@ -367,7 +367,10 @@ public class Main {
                 mol.get(i).rv.x = calcMet.x;
                 mol.get(i).rv.y = calcMet.y;
                 mol.get(i).rv.z = calcMet.z;
-
+                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
+                mol.get(i).r.x = calcMet.x;
+                mol.get(i).r.y = calcMet.y;
+                mol.get(i).r.z = calcMet.z;
 //                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
 //                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                out5.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
