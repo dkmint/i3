@@ -327,7 +327,7 @@ public class Main {
         veloSum.setZeroR();
         System.out.printf("nMol = %d\n", nMol);
         for (int i = 0; i < nMol; i ++) {
-            mol.add(new Mol());
+//            mol.add(new Mol());
 //            initVels.vRand();
             initVels.setVScale(velMag);
             mol.get(i).rv.x = initVels.x;
@@ -356,6 +356,7 @@ public class Main {
         kinEnInitSum = 0.;
         nebrNow = 1;
 //============= End of SetUpJobs() =========================
+        System.out.println("mol size = " + mol.size());
         moreCycles = true;
         while (moreCycles) {
             ++ stepCount;
