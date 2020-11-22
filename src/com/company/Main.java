@@ -12,18 +12,24 @@ import java.util.StringTokenizer;
 public class Main {
     static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
     static double dispHi, rNebrShell;
-    static int nebrNow, nebrTabFac, nebrTabLen, nebrTabMax;
+    static int nebrTabFac, nebrTabLen, nebrTabMax;
+    static boolean nebrNow;
     static int stepAvg, stepEquil, stepLimit, nMol, stepCount;
-
+    static final int[][] OFFSET_VALLS = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {-1, 1, 0},
+                                         {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}, {-1, 1, 1},
+                                         {-1, 0, 1}, {-1, -1, 1}, {0, -1, 1}, {1, -1,1}};
+    static final int N_OFFSET = 14;
+    static int stepInitlzTemp, randSeed;
     public static void main(String[] args) throws IOException {
 
+
         final int NDIM = 3;
+
         boolean moreCycles;
 
         int stepAvg, stepEquil, stepLimit, nMol, stepCount;
         double kinEnInitSum;
         double pertTrajDev;
-        int stepInitlzTemp, randSeed;
         int countTrajDev, limitTrajDev, stepTrajDev;
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
@@ -37,6 +43,7 @@ public class Main {
         File outFile4 = new File("veloAvg.d");
         File outFile5 = new File("coordsStep1.d");
         File outFile6 = new File("veloStep1.d");
+        File outFile7 = new File("cellList.d");
 
 
         BufferedReader in = new BufferedReader(new FileReader(inFile));
@@ -46,13 +53,15 @@ public class Main {
         PrintWriter out4 = new PrintWriter(new BufferedWriter(new FileWriter(outFile4))); //gnuplot
         PrintWriter out5 = new PrintWriter(new BufferedWriter(new FileWriter(outFile5))); //gnuplot
         PrintWriter out6 = new PrintWriter(new BufferedWriter(new FileWriter(outFile6))); //gnuplot
+        PrintWriter out7 = new PrintWriter(new BufferedWriter(new FileWriter(outFile7))); //gnuplot
 
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
-        ArrayList<Integer> cellList = new ArrayList<>();
-        ArrayList<Integer> nebrTab = new ArrayList<>();
+        
+
         ArrayList<Double> valTrajDev = new ArrayList<>();
         ArrayList<Mol> mol = new ArrayList<>();
+
         InitUcell initUcell = new InitUcell();
 
         VeloSum veloSum = new VeloSum();
@@ -199,7 +208,19 @@ public class Main {
         System.out.printf("cells = %d %d %d\n", cells.x, cells.y, cells.z);
         nebrTabMax = nebrTabFac * nMol;
 
-//  SetUpJob(InitCoords)
+//  SetUpJob(AllocArraya, InitRand, InitCoords, InitVels, InitAccels, AccumProps)
+        SetParams setParams = new SetParams();
+        
+        int sizeCellList = setParams.VProdI(cells) + nMol;
+//        System.out.println("sizeCellList = " + sizeCellList);
+        int sizeNebrTab = 2 * nebrTabMax;
+//        ArrayList<Integer> cellList = new ArrayList<Integer>();
+        int[] cellList = new int[sizeCellList];
+//        System.out.println("size of cellList = " + cellList.size());
+//        ArrayList<Integer> nebrTab = new ArrayList<>();
+        int[] nebrTab = new int[sizeNebrTab];
+        InitVels initVels = new InitVels();
+        initVels.initRand(randSeed);
         stepCount = 0;
         Coords coords = new Coords();
 
@@ -323,7 +344,7 @@ public class Main {
         else
             System.out.println("Error! Wrong Structure!");
 //        SetUpJobs InitVels()
-        InitVels initVels = new InitVels();
+
         veloSum.setZeroR();
         System.out.printf("nMol = %d\n", nMol);
         for (int i = 0; i < nMol; i ++) {
@@ -354,11 +375,12 @@ public class Main {
         kinEnergy.propZero();
         pressure.propZero();
         kinEnInitSum = 0.;
-        nebrNow = 1;
+        nebrNow = true;
 //============= End of SetUpJobs() =========================
-        SetParams setParams = new SetParams();
+        
         PBC pbc = new PBC();
         System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
+
         moreCycles = true;
         while (moreCycles) {
             ++ stepCount;
@@ -373,10 +395,48 @@ public class Main {
 //                mol.get(i).rv.z = setParams.rv.z;
                 setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
                 mol.get(i).r = setParams.r;
-                mol.get(0).r.x = -9.;
+//                mol.get(0).r.x = -9.;
 //                System.out.printf("mol[0].r.x = " + mol.get(0).r.x);
                 pbc.applyBC(mol.get(i).r, region);
                 mol.get(i).r = pbc.pr;
+//                Biuld Neibor List ///////////////////////////////////////////////////////
+                if (nebrNow) {
+                    nebrNow = false;
+                    dispHi = 0.;
+                    VecR dr, invWid, rs, shift;
+                    VecI cc, m1v, m2v;
+                    int[][] vOff = OFFSET_VALLS;
+                    double rrNebr;
+                    int c, m1, offset;
+                    rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
+                    setParams.VDiv(cells, region);
+                    invWid = setParams.r;
+                    for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++)
+                        cellList[n] = -1;
+                    for (int n = 0; n < nMol; n ++) {
+                        setParams.addRegion(mol.get(n).r, 0.5, region);
+                        rs = setParams.r;
+                        setParams.VMulI(rs, invWid);
+                        cc = setParams.d;
+                        c = setParams.setLinear(cc, cells) + nMol;
+                        cellList[n] = cellList[c];
+                        cellList[c] = n;
+                        out7.printf("%d %d\n", cellList[n], cellList[c]); // cellList.d
+                    }
+                    nebrTabLen = 0;
+                    for (int m1z = 0; m1z < cells.z; m1z ++) {
+                        for (int m1y = 0; m1y < cells.y; m1y ++) {
+                            for (int m1x = 0; m1x < cells.x; m1x ++) {
+                                setParams.VSet(m1x, m1y, m1z);
+                                m1v = setParams.d;
+                                m1 = setParams.setLinear(m1v, cells) + nMol;
+                                for (offset = 0; offset < N_OFFSET; offset ++) {
+
+                                }
+                            }
+                        }
+                    }
+                }
 //                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
 //                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
@@ -406,6 +466,7 @@ public class Main {
         out4.close(); //gnuplot
         out5.close();
         out6.close();
+        out7.close();
         System.out.println("nMol = " + nMol);
     }
 }
