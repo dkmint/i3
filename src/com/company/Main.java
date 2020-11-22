@@ -357,7 +357,7 @@ public class Main {
         nebrNow = 1;
 //============= End of SetUpJobs() =========================
         SetParams setParams = new SetParams();
-        System.out.println("mol size = " + mol.size());
+        System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
         moreCycles = true;
         while (moreCycles) {
             ++ stepCount;
@@ -365,22 +365,32 @@ public class Main {
             for (int i = 0; i < mol.size(); i ++) {
 //                mol.add(new Mol());
 //                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
-                setParams.VVSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
-                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+                setParams.VSAdd(mol.get(i).rv,0.5 * deltaT, mol.get(i).ra);
+                mol.get(i).rv = setParams.rv;
+//                mol.get(i).rv.x = setParams.rv.x;
+//                mol.get(i).rv.y = setParams.rv.y;
+//                mol.get(i).rv.z = setParams.rv.z;
                 setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
-//                mol.get(i).rv.x = calcMet.x;
-//                mol.get(i).rv.y = calcMet.y;
-//                mol.get(i).rv.z = calcMet.z;
+                mol.get(i).r = setParams.r;
+//                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+//                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
 //                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
+//                mol.get(i).r.x = setParams.r.x;
+//                mol.get(i).r.y = setParams.r.y;
+//                mol.get(i).r.z = setParams.r.z;
 //                mol.get(i).r.x = calcMet.x;
 //                mol.get(i).r.y = calcMet.y;
 //                mol.get(i).r.z = calcMet.z;
+                    
 //                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
 //                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
-                out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // jmol
-                out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+//                if (stepCount == 100) {
+                    out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // coordsStep1.d
+                    out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
+//                }
             }
-            moreCycles = false;
+//            if (stepCount == 100)
+                moreCycles = false;
         }
 //        System.out.printf("totEnergy %f %f\n", totEnergy.sum, totEnergy.sum2);
 //        System.out.printf("kinEnergy %f %f\n", kinEnergy.sum, kinEnergy.sum2);
