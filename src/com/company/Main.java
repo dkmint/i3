@@ -357,6 +357,7 @@ public class Main {
         nebrNow = 1;
 //============= End of SetUpJobs() =========================
         SetParams setParams = new SetParams();
+        PBC pbc = new PBC();
         System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
         moreCycles = true;
         while (moreCycles) {
@@ -372,6 +373,10 @@ public class Main {
 //                mol.get(i).rv.z = setParams.rv.z;
                 setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
                 mol.get(i).r = setParams.r;
+                mol.get(0).r.x = -9.;
+//                System.out.printf("mol[0].r.x = " + mol.get(0).r.x);
+                pbc.applyBC(mol.get(i).r, region);
+                mol.get(i).r = pbc.pr;
 //                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
 //                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
@@ -381,7 +386,7 @@ public class Main {
 //                mol.get(i).r.x = calcMet.x;
 //                mol.get(i).r.y = calcMet.y;
 //                mol.get(i).r.z = calcMet.z;
-                    
+
 //                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
 //                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                if (stepCount == 100) {
