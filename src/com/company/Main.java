@@ -328,12 +328,12 @@ public class Main {
         System.out.printf("nMol = %d\n", nMol);
         for (int i = 0; i < nMol; i ++) {
 //            mol.add(new Mol());
-//            initVels.vRand();
+            initVels.vRand();
             initVels.setVScale(velMag);
             mol.get(i).rv.x = initVels.x;
             mol.get(i).rv.y = initVels.y;
             mol.get(i).rv.z = initVels.z;
-            out3.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            out3.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //velo.d
 //            out3.printf("%d %f %f %f\n", i + 1, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
             veloSum.setVAdd(mol.get(i).rv);
         }
@@ -341,7 +341,7 @@ public class Main {
         System.out.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
         for (int i = 0; i < mol.size(); i ++) {
             mol.get(i).setAvgVel(- 1. / nMol, veloSum);
-            out4.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+            out4.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloAvg.d
         }
 //        InitAccels()
         for (int i = 0; i < mol.size(); i ++) {
@@ -356,6 +356,7 @@ public class Main {
         kinEnInitSum = 0.;
         nebrNow = 1;
 //============= End of SetUpJobs() =========================
+        SetParams setParams = new SetParams();
         System.out.println("mol size = " + mol.size());
         moreCycles = true;
         while (moreCycles) {
@@ -363,17 +364,20 @@ public class Main {
             timeNow = stepCount * deltaT;
             for (int i = 0; i < mol.size(); i ++) {
 //                mol.add(new Mol());
-                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
-                mol.get(i).rv.x = calcMet.x;
-                mol.get(i).rv.y = calcMet.y;
-                mol.get(i).rv.z = calcMet.z;
-                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
-                mol.get(i).r.x = calcMet.x;
-                mol.get(i).r.y = calcMet.y;
-                mol.get(i).r.z = calcMet.z;
+//                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
+                setParams.VVSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
+                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
+//                mol.get(i).rv.x = calcMet.x;
+//                mol.get(i).rv.y = calcMet.y;
+//                mol.get(i).rv.z = calcMet.z;
+//                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
+//                mol.get(i).r.x = calcMet.x;
+//                mol.get(i).r.y = calcMet.y;
+//                mol.get(i).r.z = calcMet.z;
 //                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
 //                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
-//                out5.printf("%s %f %f %f\n", 'C', mol.get(n).r.x, mol.get(n).r.y, mol.get(n).r.z); // jmol
+                out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // jmol
                 out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
             }
             moreCycles = false;
