@@ -9,7 +9,7 @@ import java.util.StringTokenizer;
 //   А он пусть возвращает значение, а не пишет
 //2) весь ввод выносим в один класс, сканнер должен быть как горец - только 1
 public class Main {
-    static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum;
+    static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum, virSum;
     static double dispHi, rNebrShell;
     static int nebrTabFac, nebrTabLen, nebrTabMax;
     static boolean nebrNow;
@@ -399,10 +399,11 @@ public class Main {
         while (moreCycles) {
             ++ stepCount;
             timeNow = stepCount * deltaT;
+//            LeapFrogMethod(part 1)///////////////////////////////////////////////////////////////////
             for (int i = 0; i < mol.size(); i ++) {
 //                mol.add(new Mol());
 //                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
-                setParams.VSAdd(mol.get(i).rv,0.5 * deltaT, mol.get(i).ra);
+                setParams.VSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
                 mol.get(i).rv = setParams.rv;
 //                mol.get(i).rv.x = setParams.rv.x;
 //                mol.get(i).rv.y = setParams.rv.y;
@@ -411,73 +412,86 @@ public class Main {
                 mol.get(i).r = setParams.r;
 //                mol.get(0).r.x = -9.;
 //                System.out.printf("mol[0].r.x = " + mol.get(0).r.x);
+            }// End of LeapFrog(part 1) Method////////////////////////////////////////////////////////////
+
+            for (int i = 0; i < mol.size(); i ++) { //Apply Boundary Conditions////////////////
                 pbc.setBCtoAll(mol.get(i).r, region);
                 mol.get(i).r = pbc.pr;
-//                Biuld Neibor List ///////////////////////////////////////////////////////
-                if (nebrNow) {
-                    nebrNow = false;
-                    dispHi = 0.;
-                    VecR dr, invWid, rs, shift;
-                    VecI cc, m1v, m2v;
-                    setParams.VSet(0, 0, 0);
-                    m2v = setParams.d;
-                    int[][] vOff = OFFSET_VALLS;
-                    double rrNebr;
-                    int c, m1, m2, offset;
-                    rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
-                    setParams.VDiv(cells, region);
-                    invWid = setParams.r;
-                    for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++) {
-                        cellList[n] = -1;
-//                        out7.printf("%d\n", cellList[n]/*, cellList[c]*/); // cellList.d
-                    }
-                    for (int n = 0; n < nMol; n ++) {
-                        setParams.addRegion(mol.get(n).r, 0.5, region);
-                        rs = setParams.r;
-                        setParams.VMulI(rs, invWid);
-                        cc = setParams.d;
-                        c = setParams.setLinear(cc, cells) + nMol;
-                        cellList[n] = cellList[c];
-                        cellList[c] = n;
-//                        out7.printf("cellList N = %d\t cellList C = %d\n", cellList[n], cellList[c]); // cellList.d
-                    }
-                    nebrTabLen = 0;
-                    for (int m1z = 0; m1z < cells.z; m1z ++) {
-                        for (int m1y = 0; m1y < cells.y; m1y ++) {
-                            for (int m1x = 0; m1x < cells.x; m1x ++) {
-                                setParams.VSet(m1x, m1y, m1z);
-                                m1v = setParams.d;
-//                                System.out.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z);
-//                                out7.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
-//                                break;
-                                m1 = setParams.setLinear(m1v, cells) + nMol;
-//                                out7.printf("m1 = %d\n", m1); // cellList.d
-                                for (offset = 0; offset < N_OFFSET; offset ++) {
-                                    for (int w = 0; w < 3; w ++) {
-                                        if (w == 0)
-                                              m2v.x = m1v.x + OFFSET_VALLS[i][w];
-                                        else if (w == 1)
-                                              m2v.y = m1v.y + OFFSET_VALLS[i][w];
-                                        else if (w == 2)
-                                            m2v.z = m1v.z + OFFSET_VALLS[i][w];
-                                    }
-//                                    System.out.printf("m2v = %d %d %d\n", m2v.x, m2v.y, m2v.z);
-//                                    out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
-                                    setParams.setZeroR();
-                                    shift = setParams.r;
-                                    cellWrapAll.cellWrapAllI(m2v, cells);
-                                    m2v = cellWrapAll.m2;
-                                    cellWrapAll.cellWrapAllIR(m2v, region);
-                                    shift = cellWrapAll.shif;
-//                                    out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
-//                                            shift.x, shift.y, shift.z); // cellList.d
-                                    m2 = setParams.setLinear(m2v, cells) + nMol;
-//                                    out7.printf("m2 = %d\n", m2); // cellList.d
-                                    for (int j1 = cellList[m1]; j1 >= 0; j1 = cellList[j1]) {
-                                        for (int j2 = cellList[m2]; j2 >= 0; j2 = cellList[j2]) {
-                                            if (m1 != m2 || j2 < j1) {
-                                                setParams.VSub(mol.get(j1).r, mol.get(j2).r);
-                                                dr = setParams.r;
+            } // End of Boundary Conditions////////////////
+//            Biuld Neibor List ///////////////////////////////////////////////////////
+            if (nebrNow) {
+                nebrNow = false;
+                dispHi = 0.;
+                VecR dr, invWid, rs, shift;
+                VecI cc, m1v, m2v;
+                setParams.VSet(0, 0, 0);
+                m2v = setParams.d;
+                int[][] vOff = OFFSET_VALLS;
+                double rrNebr;
+                int c, m1, m2, offset;
+                rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
+                setParams.VDiv(cells, region);
+                invWid = setParams.r;
+                for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++) {
+                    cellList[n] = -1;
+//                    out7.printf("%d\n", cellList[n]/*, cellList[c]*/); // cellList.d
+                }
+                for (int n = 0; n < nMol; n ++) {
+                    setParams.addRegion(mol.get(n).r, 0.5, region);
+                    rs = setParams.r;
+                    setParams.VMulI(rs, invWid);
+                    cc = setParams.d;
+                    c = setParams.setLinear(cc, cells) + nMol;
+                    cellList[n] = cellList[c];
+                    cellList[c] = n;
+//                    out7.printf("cellList N = %d\t cellList C = %d\n", cellList[n], cellList[c]); // cellList.d
+                }
+                nebrTabLen = 0;
+                for (int m1z = 0; m1z < cells.z; m1z ++) {
+                    for (int m1y = 0; m1y < cells.y; m1y ++) {
+                        for (int m1x = 0; m1x < cells.x; m1x ++) {
+                            setParams.VSet(m1x, m1y, m1z);
+                            m1v = setParams.d;
+//                            System.out.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z);
+//                            out7.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
+//                            break;
+                            m1 = setParams.setLinear(m1v, cells) + nMol;
+//                            out7.printf("m1 = %d\n", m1); // cellList.d
+                            for (offset = 0; offset < N_OFFSET; offset ++) {
+                                for (int w = 0; w < 3; w ++) {
+                                    if (w == 0)
+                                          m2v.x = m1v.x + OFFSET_VALLS[i][w];
+                                    else if (w == 1)
+                                          m2v.y = m1v.y + OFFSET_VALLS[i][w];
+                                    else if (w == 2)
+                                        m2v.z = m1v.z + OFFSET_VALLS[i][w];
+                                }
+//                                System.out.printf("m2v = %d %d %d\n", m2v.x, m2v.y, m2v.z);
+//                                out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
+                                setParams.setZeroR();
+                                shift = setParams.r;
+                                cellWrapAll.cellWrapAllI(m2v, cells);
+                                m2v = cellWrapAll.m2;
+                                cellWrapAll.cellWrapAllIR(m2v, region);
+                                shift = cellWrapAll.shif;
+//                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
+//                                        shift.x, shift.y, shift.z); // cellList.d
+                                m2 = setParams.setLinear(m2v, cells) + nMol;
+//                                out7.printf("m2 = %d\n", m2); // cellList.d
+                                for (int j1 = cellList[m1]; j1 >= 0; j1 = cellList[j1]) {
+                                    for (int j2 = cellList[m2]; j2 >= 0; j2 = cellList[j2]) {
+                                        if (m1 != m2 || j2 < j1) {
+                                            setParams.VSub(mol.get(j1).r, mol.get(j2).r);
+                                            dr = setParams.r;
+                                            setParams.VVSub(shift);
+                                            dr = setParams.r;
+                                            double dx = setParams.vLenSq(dr);
+                                            if (dx < rrNebr) {
+                                                if (nebrTabLen >= nebrTabMax)
+                                                    System.out.println("ERROR TOO MANY MEMBERS!!!");
+                                                nebrTab[2 * nebrTabLen] = j1;
+                                                nebrTab[2 * nebrTabLen + 1] = j2;
+                                                ++ nebrTabLen;
                                             }
                                         }
                                     }
@@ -486,6 +500,44 @@ public class Main {
                         }
                     }
                 }
+            } // End of Buil Nebor List////////////////////////////////////////////
+//  Compute Force()////////////////////////////////////////////////////////////////////
+            VecR dr;
+            double fcVal, rr, rrCut, rri, rri3, uVal;
+            int j1,j2;
+
+            rrCut = rCut * rCut;
+            for (int i = 0; i < nMol; i ++)
+                mol.get(i).setZeroRA();
+            uSum = 0.;
+            virSum = 0.;
+            for (int n = 0; n < nebrTabLen; n ++) {
+                j1 = nebrTab[2 * n];
+                j2 = nebrTab[2 * n + 1];
+                setParams.VSub(mol.get(j1).r, mol.get(j2).r);
+                dr = setParams.r;
+                pbc.setBCtoAll(dr, region);
+                dr = pbc.pr;
+                rr = setParams.vLenSq(dr);
+                if (rr < rrCut) {
+                    rri = 1. / rr;
+                    rri3 = setParams.cube(rri);
+                    fcVal = 48. * rri3 * (rri3 - 0.5) * rri;
+                    uVal = 4. * rri3 * (rri3 - 1.) + 1.;
+                    setParams.VVSAdd(mol.get(j1).ra, fcVal, dr);
+                    mol.get(j1).ra = setParams.rv;
+                    setParams.VVSAdd(mol.get(j2).ra, - fcVal, dr);
+                    mol.get(j2).ra = setParams.rv;
+                    uSum += uVal;
+                    virSum += fcVal * rr;
+                }
+            }// End of ComputeForce()=========================================
+//            LeapFrogMethod(part 2)///////////////////////////////////////////////////////////////////
+            for (int i = 0; i < mol.size(); i ++) {
+                setParams.VSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
+                mol.get(i).rv = setParams.rv;
+            }// End of LeapFrog(part 2) Method////////////////////////////////////////////////////////////
+
 //                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
 //                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
@@ -502,7 +554,7 @@ public class Main {
                     out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // coordsStep1.d
                     out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
 //                }
-            }
+
 //            if (stepCount == 100)
                 moreCycles = false;
         }

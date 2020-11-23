@@ -6,11 +6,23 @@ public class SetParams {
     VecI d = new VecI();
     VecR r = new VecR();
     VecR rv = new VecR();
-//    double x, y, z;
+    double dx, dy, dz;
+
+    public double cube(double d) {
+        return d * d * d;
+    }
+    public double vLenSq(VecR v) {
+        return  v.x * v.x + v.y * v.y + v.z * v.z;
+    }
     public void VSub (VecR x, VecR y) {
         this.r.x = x.x - y.x;
         this.r.y = x.y - y.y;
         this.r.z = x.z - y.z;
+    }
+    public void VVSub (VecR y) {
+        this.r.x = this.r.x - y.x;
+        this.r.y = this.r.y - y.y;
+        this.r.z = this.r.z - y.z;
     }
     public void setZeroR() {
         this.r.x = 0;
@@ -70,9 +82,9 @@ public class SetParams {
         this.rv.z = v2.z + s3 * v3.z;
     }
     public void VVSAdd(VecR r, double s2, VecR v2) {
-        this.r.x = r.x + s2 * v2.x;
-        this.r.y = r.y + s2 * v2.y;
-        this.r.z = r.z + s2 * v2.z;
+        this.r.x = this.r.x + s2 * v2.x;
+        this.r.y = this.r.y + s2 * v2.y;
+        this.r.z = this.r.z + s2 * v2.z;
     }
     public int setLinear(VecI cc, Cells cells) {
         return ((cc.z * cells.y) + cc.y) * cells.x + cc.x;
