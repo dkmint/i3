@@ -1,10 +1,22 @@
 package com.company;
 
+import java.util.ArrayList;
+
 public class SetParams {
     VecI d = new VecI();
     VecR r = new VecR();
     VecR rv = new VecR();
 //    double x, y, z;
+    public void VSub (VecR x, VecR y) {
+        this.r.x = x.x - y.x;
+        this.r.y = x.y - y.y;
+        this.r.z = x.z - y.z;
+    }
+    public void setZeroR() {
+        this.r.x = 0;
+        this.r.y = 0;
+        this.r.z = 0;
+    }
     public static void VSCopyR(VecR v2, double s1, VecI v1) {
         v2.x = s1 * v1.x;
         v2.y = s1 * v1.y;
@@ -15,8 +27,10 @@ public class SetParams {
         v2.y = (int) (s1 * v1.y);
         v2.z = (int) (s1 * v1.z);
     }
-    public void VAddI(VecI m1v, VecI ) {
-        this.d.x = m1v.x + vOff[];
+    public void VAddI(VecI m1v, VecI ofs) {
+        this.d.x = m1v.x + ofs.x;
+        this.d.y = m1v.y + ofs.y;
+        this.d.z = m1v.z + ofs.z;
     }
     public void VDiv(Cells v2, Region v3) {
         this.r.x = v2.x / v3.x;

@@ -391,7 +391,8 @@ public class Main {
 //============= End of SetUpJobs() =========================
         
         ApplyBC pbc = new ApplyBC();
-        CellWrap cellWrapAll = new CellWrap();
+        CellWrapAll cellWrapAll = new CellWrapAll();
+
         System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
 
         moreCycles = true;
@@ -422,12 +423,14 @@ public class Main {
                     m2v = setParams.d;
                     int[][] vOff = OFFSET_VALLS;
                     double rrNebr;
-                    int c, m1, offset;
+                    int c, m1, m2, offset;
                     rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
                     setParams.VDiv(cells, region);
                     invWid = setParams.r;
-                    for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++)
+                    for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++) {
                         cellList[n] = -1;
+//                        out7.printf("%d\n", cellList[n]/*, cellList[c]*/); // cellList.d
+                    }
                     for (int n = 0; n < nMol; n ++) {
                         setParams.addRegion(mol.get(n).r, 0.5, region);
                         rs = setParams.r;
@@ -436,7 +439,7 @@ public class Main {
                         c = setParams.setLinear(cc, cells) + nMol;
                         cellList[n] = cellList[c];
                         cellList[c] = n;
-                        out7.printf("%d %d\n", cellList[n], cellList[c]); // cellList.d
+//                        out7.printf("cellList N = %d\t cellList C = %d\n", cellList[n], cellList[c]); // cellList.d
                     }
                     nebrTabLen = 0;
                     for (int m1z = 0; m1z < cells.z; m1z ++) {
@@ -448,6 +451,7 @@ public class Main {
 //                                out7.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
 //                                break;
                                 m1 = setParams.setLinear(m1v, cells) + nMol;
+//                                out7.printf("m1 = %d\n", m1); // cellList.d
                                 for (offset = 0; offset < N_OFFSET; offset ++) {
                                     for (int w = 0; w < 3; w ++) {
                                         if (w == 0)
@@ -461,8 +465,22 @@ public class Main {
 //                                    out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
                                     setParams.setZeroR();
                                     shift = setParams.r;
-                                    if (m2v > cells)
-
+                                    cellWrapAll.cellWrapAllI(m2v, cells);
+                                    m2v = cellWrapAll.m2;
+                                    cellWrapAll.cellWrapAllIR(m2v, region);
+                                    shift = cellWrapAll.shif;
+//                                    out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
+//                                            shift.x, shift.y, shift.z); // cellList.d
+                                    m2 = setParams.setLinear(m2v, cells) + nMol;
+//                                    out7.printf("m2 = %d\n", m2); // cellList.d
+                                    for (int j1 = cellList[m1]; j1 >= 0; j1 = cellList[j1]) {
+                                        for (int j2 = cellList[m2]; j2 >= 0; j2 = cellList[j2]) {
+                                            if (m1 != m2 || j2 < j1) {
+                                                setParams.VSub(mol.get(j1).r, mol.get(j2).r);
+                                                dr = setParams.r;
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
