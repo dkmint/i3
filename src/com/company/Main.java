@@ -1,8 +1,7 @@
-package com.company;
 
+package com.company;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.IllegalFormatException;
 import java.util.InputMismatchException;
 import java.util.StringTokenizer;
 //1) класс должен заниматься одним конкретным делом, то есть если уж он у тебя занимается расчетами,
@@ -15,18 +14,30 @@ public class Main {
     static int nebrTabFac, nebrTabLen, nebrTabMax;
     static boolean nebrNow;
     static int stepAvg, stepEquil, stepLimit, nMol, stepCount;
-    static final int[][] OFFSET_VALLS = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {-1, 1, 0},
-                                         {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}, {-1, 1, 1},
-                                         {-1, 0, 1}, {-1, -1, 1}, {0, -1, 1}, {1, -1,1}};
+
     static final int N_OFFSET = 14;
     static int stepInitlzTemp, randSeed;
+
     public static void main(String[] args) throws IOException {
+        int[][] OFFSET_VALLS = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {-1, 1, 0},
+                {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}, {-1, 1, 1},
+                {-1, 0, 1}, {-1, -1, 1}, {0, -1, 1}, {1, -1, 1}};
 
+//        ArrayList<VecI> offset_vals = new ArrayList<>();
 
+//        for (int i = 0; i < N_OFFSET; i ++) {
+//            offset_vals.add(new VecI());
+//            for (int z = 0; z < 3; z ++) {
+//                if (z == 0)
+//                    offset_vals.get(i).x = OFFSET_VALLS[i][z];
+//                else if (z == 1)
+//                    offset_vals.get(i).y = OFFSET_VALLS[i][z];
+//                else if (z == 2)
+//                    offset_vals.get(i).z = OFFSET_VALLS[i][z];
+//            }
+//        }
         final int NDIM = 3;
-
         boolean moreCycles;
-
         int stepAvg, stepEquil, stepLimit, nMol, stepCount;
         double kinEnInitSum;
         double pertTrajDev;
@@ -209,8 +220,9 @@ public class Main {
         nebrTabMax = nebrTabFac * nMol;
 
 //  SetUpJob(AllocArraya, InitRand, InitCoords, InitVels, InitAccels, AccumProps)
+
         SetParams setParams = new SetParams();
-        
+
         int sizeCellList = setParams.VProdI(cells) + nMol;
 //        System.out.println("sizeCellList = " + sizeCellList);
         int sizeNebrTab = 2 * nebrTabMax;
@@ -378,7 +390,8 @@ public class Main {
         nebrNow = true;
 //============= End of SetUpJobs() =========================
         
-        PBC pbc = new PBC();
+        ApplyBC pbc = new ApplyBC();
+        CellWrap cellWrapAll = new CellWrap();
         System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
 
         moreCycles = true;
@@ -397,7 +410,7 @@ public class Main {
                 mol.get(i).r = setParams.r;
 //                mol.get(0).r.x = -9.;
 //                System.out.printf("mol[0].r.x = " + mol.get(0).r.x);
-                pbc.applyBC(mol.get(i).r, region);
+                pbc.setBCtoAll(mol.get(i).r, region);
                 mol.get(i).r = pbc.pr;
 //                Biuld Neibor List ///////////////////////////////////////////////////////
                 if (nebrNow) {
@@ -405,6 +418,8 @@ public class Main {
                     dispHi = 0.;
                     VecR dr, invWid, rs, shift;
                     VecI cc, m1v, m2v;
+                    setParams.VSet(0, 0, 0);
+                    m2v = setParams.d;
                     int[][] vOff = OFFSET_VALLS;
                     double rrNebr;
                     int c, m1, offset;
@@ -429,8 +444,24 @@ public class Main {
                             for (int m1x = 0; m1x < cells.x; m1x ++) {
                                 setParams.VSet(m1x, m1y, m1z);
                                 m1v = setParams.d;
+//                                System.out.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z);
+//                                out7.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
+//                                break;
                                 m1 = setParams.setLinear(m1v, cells) + nMol;
                                 for (offset = 0; offset < N_OFFSET; offset ++) {
+                                    for (int w = 0; w < 3; w ++) {
+                                        if (w == 0)
+                                              m2v.x = m1v.x + OFFSET_VALLS[i][w];
+                                        else if (w == 1)
+                                              m2v.y = m1v.y + OFFSET_VALLS[i][w];
+                                        else if (w == 2)
+                                            m2v.z = m1v.z + OFFSET_VALLS[i][w];
+                                    }
+//                                    System.out.printf("m2v = %d %d %d\n", m2v.x, m2v.y, m2v.z);
+//                                    out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
+                                    setParams.setZeroR();
+                                    shift = setParams.r;
+                                    if (m2v > cells)
 
                                 }
                             }
