@@ -8,6 +8,11 @@ public class SetParams {
     VecR rv = new VecR();
     double dx, dy, dz;
 
+    public void VAdd(VecR rv) {
+        this.rv.x = this.rv.x + rv.x;
+        this.rv.y = this.rv.y + rv.y;
+        this.rv.z = this.rv.z + rv.z;
+    }
     public double cube(double d) {
         return d * d * d;
     }

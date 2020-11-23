@@ -12,9 +12,10 @@ public class Main {
     static double deltaT, density, temperature, rCut, velMag, timeNow, uSum, vvSum, virSum;
     static double dispHi, rNebrShell;
     static int nebrTabFac, nebrTabLen, nebrTabMax;
+//    static int nebrNow;
     static boolean nebrNow;
     static int stepAvg, stepEquil, stepLimit, nMol, stepCount;
-
+//    static int stepAvg, stepEquil, stepLimit, nMol, stepCount;
     static final int N_OFFSET = 14;
     static int stepInitlzTemp, randSeed;
 
@@ -38,10 +39,11 @@ public class Main {
 //        }
         final int NDIM = 3;
         boolean moreCycles;
-        int stepAvg, stepEquil, stepLimit, nMol, stepCount;
+
         double kinEnInitSum;
         double pertTrajDev;
         int countTrajDev, limitTrajDev, stepTrajDev;
+        VecR vSum = new VecR();
         Prop kinEnergy = new Prop();
         Prop totEnergy = new Prop();
         Prop pressure = new Prop();
@@ -204,6 +206,7 @@ public class Main {
             }
         }
         System.out.println("==================================");
+        System.out.println("stepEquil = " + stepEquil);
 //  SetParams()
         rCut = Math.pow(2., 1./6.);
 //        Region region = new Region(density, initUcell, "sc");
@@ -382,25 +385,25 @@ public class Main {
 //            System.out.printf("mol.ra = %f %f %f\n", mol.get(i).ra.x, mol.get(i).ra.y, mol.get(i).ra.z);
         }
 
-// AccumProps()
+// AccumProps(0)
         totEnergy.propZero();
         kinEnergy.propZero();
         pressure.propZero();
         kinEnInitSum = 0.;
-        nebrNow = true;
+        nebrNow = true; // AccumProps(0)
 //============= End of SetUpJobs() =========================
         
         ApplyBC pbc = new ApplyBC();
         CellWrapAll cellWrapAll = new CellWrapAll();
 
         System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
-
+// Begin SingleStep==================================================================================
         moreCycles = true;
         while (moreCycles) {
-            ++ stepCount;
+            ++stepCount;
             timeNow = stepCount * deltaT;
 //            LeapFrogMethod(part 1)///////////////////////////////////////////////////////////////////
-            for (int i = 0; i < mol.size(); i ++) {
+            for (int i = 0; i < mol.size(); i++) {
 //                mol.add(new Mol());
 //                calcMet.leapFrogStep(0.5 * deltaT, mol.get(i).ra);
                 setParams.VSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
@@ -414,7 +417,7 @@ public class Main {
 //                System.out.printf("mol[0].r.x = " + mol.get(0).r.x);
             }// End of LeapFrog(part 1) Method////////////////////////////////////////////////////////////
 
-            for (int i = 0; i < mol.size(); i ++) { //Apply Boundary Conditions////////////////
+            for (int i = 0; i < mol.size(); i++) { //Apply Boundary Conditions////////////////
                 pbc.setBCtoAll(mol.get(i).r, region);
                 mol.get(i).r = pbc.pr;
             } // End of Boundary Conditions////////////////
@@ -432,11 +435,11 @@ public class Main {
                 rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
                 setParams.VDiv(cells, region);
                 invWid = setParams.r;
-                for (int n = nMol; n < nMol + setParams.VProdI(cells); n ++) {
+                for (int n = nMol; n < nMol + setParams.VProdI(cells); n++) {
                     cellList[n] = -1;
 //                    out7.printf("%d\n", cellList[n]/*, cellList[c]*/); // cellList.d
                 }
-                for (int n = 0; n < nMol; n ++) {
+                for (int n = 0; n < nMol; n++) {
                     setParams.addRegion(mol.get(n).r, 0.5, region);
                     rs = setParams.r;
                     setParams.VMulI(rs, invWid);
@@ -447,9 +450,9 @@ public class Main {
 //                    out7.printf("cellList N = %d\t cellList C = %d\n", cellList[n], cellList[c]); // cellList.d
                 }
                 nebrTabLen = 0;
-                for (int m1z = 0; m1z < cells.z; m1z ++) {
-                    for (int m1y = 0; m1y < cells.y; m1y ++) {
-                        for (int m1x = 0; m1x < cells.x; m1x ++) {
+                for (int m1z = 0; m1z < cells.z; m1z++) {
+                    for (int m1y = 0; m1y < cells.y; m1y++) {
+                        for (int m1x = 0; m1x < cells.x; m1x++) {
                             setParams.VSet(m1x, m1y, m1z);
                             m1v = setParams.d;
 //                            System.out.printf("m1v = %d %d %d\n", m1v.x, m1v.y, m1v.z);
@@ -457,14 +460,14 @@ public class Main {
 //                            break;
                             m1 = setParams.setLinear(m1v, cells) + nMol;
 //                            out7.printf("m1 = %d\n", m1); // cellList.d
-                            for (offset = 0; offset < N_OFFSET; offset ++) {
-                                for (int w = 0; w < 3; w ++) {
+                            for (offset = 0; offset < N_OFFSET; offset++) {
+                                for (int w = 0; w < 3; w++) {
                                     if (w == 0)
-                                          m2v.x = m1v.x + OFFSET_VALLS[i][w];
+                                        m2v.x = m1v.x + OFFSET_VALLS[offset][w];
                                     else if (w == 1)
-                                          m2v.y = m1v.y + OFFSET_VALLS[i][w];
+                                        m2v.y = m1v.y + OFFSET_VALLS[offset][w];
                                     else if (w == 2)
-                                        m2v.z = m1v.z + OFFSET_VALLS[i][w];
+                                        m2v.z = m1v.z + OFFSET_VALLS[offset][w];
                                 }
 //                                System.out.printf("m2v = %d %d %d\n", m2v.x, m2v.y, m2v.z);
 //                                out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
@@ -491,7 +494,7 @@ public class Main {
                                                     System.out.println("ERROR TOO MANY MEMBERS!!!");
                                                 nebrTab[2 * nebrTabLen] = j1;
                                                 nebrTab[2 * nebrTabLen + 1] = j2;
-                                                ++ nebrTabLen;
+                                                ++nebrTabLen;
                                             }
                                         }
                                     }
@@ -504,14 +507,14 @@ public class Main {
 //  Compute Force()////////////////////////////////////////////////////////////////////
             VecR dr;
             double fcVal, rr, rrCut, rri, rri3, uVal;
-            int j1,j2;
+            int j1, j2;
 
             rrCut = rCut * rCut;
-            for (int i = 0; i < nMol; i ++)
+            for (int i = 0; i < nMol; i++)
                 mol.get(i).setZeroRA();
             uSum = 0.;
             virSum = 0.;
-            for (int n = 0; n < nebrTabLen; n ++) {
+            for (int n = 0; n < nebrTabLen; n++) {
                 j1 = nebrTab[2 * n];
                 j2 = nebrTab[2 * n + 1];
                 setParams.VSub(mol.get(j1).r, mol.get(j2).r);
@@ -526,19 +529,67 @@ public class Main {
                     uVal = 4. * rri3 * (rri3 - 1.) + 1.;
                     setParams.VVSAdd(mol.get(j1).ra, fcVal, dr);
                     mol.get(j1).ra = setParams.rv;
-                    setParams.VVSAdd(mol.get(j2).ra, - fcVal, dr);
+                    setParams.VVSAdd(mol.get(j2).ra, -fcVal, dr);
                     mol.get(j2).ra = setParams.rv;
                     uSum += uVal;
                     virSum += fcVal * rr;
                 }
             }// End of ComputeForce()=========================================
 //            LeapFrogMethod(part 2)///////////////////////////////////////////////////////////////////
-            for (int i = 0; i < mol.size(); i ++) {
+            for (int i = 0; i < mol.size(); i++) {
                 setParams.VSAdd(mol.get(i).rv, 0.5 * deltaT, mol.get(i).ra);
                 mol.get(i).rv = setParams.rv;
             }// End of LeapFrog(part 2) Method////////////////////////////////////////////////////////////
-
-//                System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
+//            EvalProps()=====================================================================
+            double vv, vvMax;
+            setParams.setZeroR();
+            vSum = setParams.r;
+            vvSum = 0.;
+            vvMax = 0.;
+            for (int n = 0; n < nMol; n++) {
+                setParams.VAdd(mol.get(n).rv);
+                vSum = setParams.rv;
+                vv = setParams.vLenSq(mol.get(n).rv);
+                vvSum += vv;
+                vvMax = Math.max(vvMax, vv);
+            }
+            dispHi += Math.sqrt(vvMax) * deltaT;
+            if (dispHi > 0.5 * rNebrShell)
+                nebrNow = true;
+            kinEnergy.val = 0.5 * vvSum / nMol;
+            totEnergy.val = kinEnergy.val + uSum / nMol;
+            pressure.val = density * (vvSum + virSum) / (nMol * NDIM);
+//            End of EvalProps() method================================================
+            if (stepCount < stepEquil) {//AdjustInitTemp()=====================================================
+                double vFac;
+                kinEnInitSum += kinEnergy.val;
+                if (stepCount % stepInitlzTemp == 0) {
+                    kinEnInitSum /= stepInitlzTemp;
+                    vFac = velMag / Math.sqrt(2. * kinEnInitSum);
+                    for (int n = 0; n < nMol; n++) {
+                        initVels.setVScale(vFac);
+                        mol.get(n).rv.x = initVels.x;
+                        mol.get(n).rv.y = initVels.y;
+                        mol.get(n).rv.z = initVels.z;
+                    }
+                    kinEnInitSum = 0.;
+                }
+            }// End AdjustInitTemp()=============================================================================
+            totEnergy.propAccum(); //Begin AccumProps(1)
+            kinEnergy.propAccum();
+            pressure.propAccum(); //End AccumProps(1)
+            if (stepCount % stepAvg == 0) {
+                totEnergy.propAvg(stepAvg);//Begin AccumProps(2)
+                kinEnergy.propAvg(stepAvg);
+                pressure.propAvg(stepAvg); //End AccumPropsAvg(2)
+//                PrintSummary();
+                totEnergy.propZero(); // AccumProps(0)
+                kinEnergy.propZero();
+                pressure.propZero(); // AccumProps(0)
+            }
+            moreCycles = false;
+        }
+//                  System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
 //                calcMet.leapFrogStep(deltaT, mol.get(i).rv);
 //                mol.get(i).r.x = setParams.r.x;
@@ -551,13 +602,13 @@ public class Main {
 //                System.out.printf("%d %f %f %f\t%f %f %f\n", i, mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z,
 //                        mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                if (stepCount == 100) {
-                    out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // coordsStep1.d
-                    out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
+//                    out5.printf("%s %f %f %f\n", 'C', mol.get(i).r.x, mol.get(i).r.y, mol.get(i).r.z); // coordsStep1.d
+//                    out6.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
 //                }
 
 //            if (stepCount == 100)
-                moreCycles = false;
-        }
+
+//        }
 //        System.out.printf("totEnergy %f %f\n", totEnergy.sum, totEnergy.sum2);
 //        System.out.printf("kinEnergy %f %f\n", kinEnergy.sum, kinEnergy.sum2);
 //        System.out.printf("pressure %f %f\n", pressure.sum, pressure.sum2);
@@ -568,6 +619,6 @@ public class Main {
         out5.close();
         out6.close();
         out7.close();
-        System.out.println("nMol = " + nMol);
+//        System.out.println("nMol = " + nMol);
     }
 }
