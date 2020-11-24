@@ -8,6 +8,9 @@ public class SetParams {
     VecR rv = new VecR();
     double dx, dy, dz;
 
+    public double VCSum(VecR vr) {
+        return vr.x + vr.y + vr.z;
+    }
     public void VAdd(VecR rv) {
         this.rv.x = this.rv.x + rv.x;
         this.rv.y = this.rv.y + rv.y;
