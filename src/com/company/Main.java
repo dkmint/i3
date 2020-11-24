@@ -586,7 +586,8 @@ public class Main {
                 pressure.propAvg(stepAvg); //End AccumPropsAvg(2)
 //                PrintSummary();
                 out8.printf("%5d %8.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-                        stepCount, timeNow, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
+                        stepCount, timeNow, setParams.VCSum(vSum) / nMol, totEnergy.sum, totEnergy.sum2,
+                        kinEnergy.sum, kinEnergy.sum2, pressure.sum, pressure.sum2); //results.d
 
                 totEnergy.propZero(); // AccumProps(0)
                 kinEnergy.propZero();
