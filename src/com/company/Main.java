@@ -57,6 +57,7 @@ public class Main {
         File outFile5 = new File("coordsStep1.d");
         File outFile6 = new File("veloStep1.d");
         File outFile7 = new File("cellList.d");
+        File outFile8 = new File("results.d");
 
 
         BufferedReader in = new BufferedReader(new FileReader(inFile));
@@ -67,6 +68,7 @@ public class Main {
         PrintWriter out5 = new PrintWriter(new BufferedWriter(new FileWriter(outFile5))); //gnuplot
         PrintWriter out6 = new PrintWriter(new BufferedWriter(new FileWriter(outFile6))); //gnuplot
         PrintWriter out7 = new PrintWriter(new BufferedWriter(new FileWriter(outFile7))); //gnuplot
+        PrintWriter out8 = new PrintWriter(new BufferedWriter(new FileWriter(outFile8))); //gnuplot results.d
 
         ArrayList<NameI> nameI = new ArrayList<>();
         ArrayList<NameR> nameR = new ArrayList<>();
@@ -583,11 +585,16 @@ public class Main {
                 kinEnergy.propAvg(stepAvg);
                 pressure.propAvg(stepAvg); //End AccumPropsAvg(2)
 //                PrintSummary();
+                out8.printf("%5d %8.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
+                        stepCount, timeNow, mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloSteps1.d
+
                 totEnergy.propZero(); // AccumProps(0)
                 kinEnergy.propZero();
                 pressure.propZero(); // AccumProps(0)
             }
-            moreCycles = false;
+            if (stepCount >= stepLimit) {
+                moreCycles = false;
+            }
         }
 //                  System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
@@ -619,6 +626,7 @@ public class Main {
         out5.close();
         out6.close();
         out7.close();
+        out8.close();
 //        System.out.println("nMol = " + nMol);
     }
 }
