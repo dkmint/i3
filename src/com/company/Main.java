@@ -585,10 +585,14 @@ public class Main {
                 kinEnergy.propAvg(stepAvg);
                 pressure.propAvg(stepAvg); //End AccumPropsAvg(2)
 //                PrintSummary();
+                System.out.printf("%5d %8.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
+                        stepCount, timeNow, setParams.VCSum(vSum) / nMol, totEnergy.sum, totEnergy.sum2,
+                        kinEnergy.sum, kinEnergy.sum2, pressure.sum, pressure.sum2);
                 out8.printf("%5d %8.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f %7.4f\n",
                         stepCount, timeNow, setParams.VCSum(vSum) / nMol, totEnergy.sum, totEnergy.sum2,
                         kinEnergy.sum, kinEnergy.sum2, pressure.sum, pressure.sum2); //results.d
-
+                out8.flush();
+//                End PrintSummary()
                 totEnergy.propZero(); // AccumProps(0)
                 kinEnergy.propZero();
                 pressure.propZero(); // AccumProps(0)
