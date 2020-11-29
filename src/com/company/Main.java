@@ -495,6 +495,9 @@ public class Main {
                                 if (m2v.z >= cells.z) {
                                     m2v.z = 0;
                                     shift.z = region.z;
+                                } else if (m2v.z < 0) {
+                                    m2v.z = cells.z;
+                                    shift.z = -region.z;
                                 }
 //                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
 //                                        shift.x, shift.y, shift.z); // cellList.d
