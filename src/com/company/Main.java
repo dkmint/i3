@@ -485,6 +485,10 @@ public class Main {
                                     m2v.x = cells.x;
                                     shift.x = -region.x;
                                 }
+                                if (m2v.y >= cells.y) {
+                                    m2v.y = 0;
+                                    shift.y = region.y;
+                                }
 //                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
 //                                        shift.x, shift.y, shift.z); // cellList.d
                                 m2 = setParams.setLinear(m2v, cells) + nMol;
