@@ -211,6 +211,7 @@ public class Main {
         System.out.println("stepEquil = " + stepEquil);
 //  SetParams()
         rCut = Math.pow(2., 1./6.);
+        System.out.println("rCut = " + rCut);
 //        Region region = new Region(density, initUcell, "sc");
 //        Region region = new Region(density, initUcell, "bcc");
 //        Region region = new Region(density, initUcell, "fcc");
@@ -241,11 +242,11 @@ public class Main {
         stepCount = 0;
         Coords coords = new Coords();
 
-        System.out.printf("gap = %f %f %f\n", coords.gapX, coords.gapY, coords.gapZ);
+//        System.out.printf("gap = %f %f %f\n", coords.gapX, coords.gapY, coords.gapZ);
         out1.printf("%s\nC\n", Integer.toString(nMol)); // jmol coords.d
 //        System.out.println("Hello from coords!");
 //        coords.setStructure();
-        System.out.printf("coords = %f %f %f\n", coords.x, coords.y, coords.z);
+//        System.out.printf("coords = %f %f %f\n", coords.x, coords.y, coords.z);
         if (region.structName.equals("sc")) {
             coords.setGap(region, initUcell);
             int n = 0;
@@ -376,7 +377,7 @@ public class Main {
             veloSum.setVAdd(mol.get(i).rv);
         }
 
-        System.out.printf("%f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
+        System.out.printf("veloSum = %f %f %f\n", veloSum.x, veloSum.y, veloSum.z);
         for (int i = 0; i < mol.size(); i ++) {
             mol.get(i).setAvgVel(- 1. / nMol, veloSum);
             out4.printf("%f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z); //veloAvg.d
@@ -398,7 +399,7 @@ public class Main {
         ApplyBC pbc = new ApplyBC();
         CellWrapAll cellWrapAll = new CellWrapAll();
 
-        System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
+//        System.out.printf("mol size = %f %f %f\n", mol.get(0).r.x, mol.get(0).rv.x, mol.get(0).ra.x);
 // Begin SingleStep==================================================================================
         moreCycles = true;
         while (moreCycles) {
@@ -431,12 +432,14 @@ public class Main {
                 VecI cc, m1v, m2v;
                 setParams.VSet(0, 0, 0);
                 m2v = setParams.d;
-                int[][] vOff = OFFSET_VALLS;
+//                int[][] vOff = OFFSET_VALLS;
                 double rrNebr;
                 int c, m1, m2, offset;
                 rrNebr = (rCut + rNebrShell) * (rCut + rNebrShell);
+//                System.out.println("rrNebr = " + rrNebr);
                 setParams.VDiv(cells, region);
                 invWid = setParams.r;
+                System.out.println("invWid = " + invWid);
                 for (int n = nMol; n < nMol + setParams.VProdI(cells); n++) {
                     cellList[n] = -1;
 //                    out7.printf("%d\n", cellList[n]/*, cellList[c]*/); // cellList.d
@@ -475,10 +478,7 @@ public class Main {
 //                                out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
                                 setParams.setZeroR();
                                 shift = setParams.r;
-                                cellWrapAll.cellWrapAllI(m2v, cells);
-                                m2v = cellWrapAll.m2;
-                                cellWrapAll.cellWrapAllIR(m2v, region);
-                                shift = cellWrapAll.shif;
+                                
 //                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
 //                                        shift.x, shift.y, shift.z); // cellList.d
                                 m2 = setParams.setLinear(m2v, cells) + nMol;
@@ -490,12 +490,16 @@ public class Main {
                                             dr = setParams.r;
                                             setParams.VVSub(shift);
                                             dr = setParams.r;
+//                                            System.out.printf("dr = %f %f %f\n", dr.x, dr.y, dr.z);
                                             double dx = setParams.vLenSq(dr);
+                                            System.out.println("dx = " + dx);
                                             if (dx < rrNebr) {
                                                 if (nebrTabLen >= nebrTabMax)
                                                     System.out.println("ERROR TOO MANY MEMBERS!!!");
                                                 nebrTab[2 * nebrTabLen] = j1;
                                                 nebrTab[2 * nebrTabLen + 1] = j2;
+                                                System.out.printf("%d nebrTab[j1] = %d\tnebrTab[j2] = %d\n",
+                                                        nebrTabLen, nebrTab[2 * nebrTabLen], nebrTab[2 * nebrTabLen + 1]);
                                                 ++nebrTabLen;
                                             }
                                         }
@@ -597,9 +601,9 @@ public class Main {
                 kinEnergy.propZero();
                 pressure.propZero(); // AccumProps(0)
             }
-            if (stepCount >= stepLimit) {
+//            if (stepCount >= stepLimit) {
                 moreCycles = false;
-            }
+//            }
         }
 //                  System.out.printf("mol.rv = %f %f %f\n", mol.get(i).rv.x, mol.get(i).rv.y, mol.get(i).rv.z);
 //                setParams.VVSAdd(mol.get(i).r, deltaT, mol.get(i).rv);
