@@ -478,7 +478,10 @@ public class Main {
 //                                out7.printf("m2v = %d %d %d\n", m1v.x, m1v.y, m1v.z); // cellList.d
                                 setParams.setZeroR();
                                 shift = setParams.r;
-                                
+                                if (m2v.x >= cells.x) {
+                                    m2v.x = 0;
+                                    shift.x = region.x;
+                                }
 //                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
 //                                        shift.x, shift.y, shift.z); // cellList.d
                                 m2 = setParams.setLinear(m2v, cells) + nMol;
