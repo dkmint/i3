@@ -488,6 +488,9 @@ public class Main {
                                 if (m2v.y >= cells.y) {
                                     m2v.y = 0;
                                     shift.y = region.y;
+                                } else if (m2v.y < 0) {
+                                    m2v.y = cells.y;
+                                    shift.y = -region.y;
                                 }
 //                                out7.printf("m2v = %d %d %d\tshift = %f %f %f\n", m2v.x, m2v.y, m2v.z,
 //                                        shift.x, shift.y, shift.z); // cellList.d
